@@ -1,0 +1,89 @@
+{
+  "index_patterns": ["error_log*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "parent_request_id": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword"
+        },
+        "app_version": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "stack_trace": {
+          "type": "text",
+          "index": false
+        },
+        "exception_class": {
+          "type": "keyword"
+        },
+        "code": {
+          "type": "integer"
+        },
+        "previous_exception": {
+          "type": "object",
+          "properties": {
+            "class": {
+              "type": "keyword"
+            },
+            "message": {
+              "type": "text"
+            }
+          }
+        },
+        "context_user_id": {
+          "type": "keyword"
+        },
+        "context_route": {
+          "type": "keyword"
+        },
+        "context_method": {
+          "type": "keyword"
+        },
+        "context_url": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 6,
+  "_meta": {
+    "description": "Template for error_log index with strict mapping - fields at root level"
+  }
+}

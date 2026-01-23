@@ -1,0 +1,94 @@
+{
+  "index_patterns": ["general_log*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "parent_request_id": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword"
+        },
+        "app_version": {
+          "type": "keyword"
+        },
+        "file": {
+          "type": "keyword"
+        },
+        "line": {
+          "type": "integer"
+        },
+        "class": {
+          "type": "keyword"
+        },
+        "function": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "event": {
+          "type": "keyword"
+        },
+        "user_id": {
+          "type": "keyword"
+        },
+        "entity_type": {
+          "type": "keyword"
+        },
+        "entity_id": {
+          "type": "keyword"
+        },
+        "feature": {
+          "type": "keyword"
+        },
+        "action_type": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 6,
+  "_meta": {
+    "description": "Template for general_log index with strict mapping - fields at root level"
+  }
+}

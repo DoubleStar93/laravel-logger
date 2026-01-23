@@ -1,0 +1,19 @@
+    ->withMiddleware(function (Middleware $middleware): void {
+        // Laravel Logger middleware (auto-registered by package)
+        // Use env() directly since config() is not available at this point
+        $requestIdEnabled = filter_var(env('LOG_MIDDLEWARE_REQUEST_ID', true), FILTER_VALIDATE_BOOL);
+        $apiAccessEnabled = filter_var(env('LOG_MIDDLEWARE_API_ACCESS', true), FILTER_VALIDATE_BOOL);
+        $flushDeferredEnabled = filter_var(env('LOG_MIDDLEWARE_FLUSH_DEFERRED', true), FILTER_VALIDATE_BOOL);
+        
+        if ($requestIdEnabled) {
+            $middleware->append(\Ermetix\LaravelLogger\Http\Middleware\RequestId::class);
+        }
+        
+        if ($apiAccessEnabled) {
+            $middleware->append(\Ermetix\LaravelLogger\Http\Middleware\ApiAccessLog::class);
+        }
+        
+        if ($flushDeferredEnabled) {
+            $middleware->append(\Ermetix\LaravelLogger\Http\Middleware\FlushDeferredLogs::class);
+        }
+    })

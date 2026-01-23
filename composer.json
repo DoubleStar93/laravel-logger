@@ -1,0 +1,80 @@
+{
+    "name": "ermetix/laravel-logger",
+    "version": "1.0.0",
+    "description": "Advanced logging package for Laravel with OpenSearch, Kafka, and typed logging support",
+    "keywords": [
+        "laravel",
+        "logging",
+        "opensearch",
+        "kafka",
+        "typed-logging",
+        "deferred-logging"
+    ],
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^4.3",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "orchestra/testbench": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ermetix\\LaravelLogger\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ermetix\\LaravelLogger\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ermetix\\LaravelLogger\\LaravelLoggerServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "scripts": {
+        "test": [
+            "vendor/bin/pest"
+        ],
+        "test-coverage": [
+            "vendor/bin/pest --coverage"
+        ],
+        "test-coverage-text": [
+            "vendor/bin/pest --coverage-text"
+        ],
+        "test-coverage-html": [
+            "vendor/bin/pest --coverage --coverage-html=coverage"
+        ],
+        "test-coverage-min": [
+            "vendor/bin/pest --coverage --min=80"
+        ],
+        "test-coverage-clover": [
+            "vendor/bin/pest --coverage-clover=coverage.xml"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "your.email@example.com"
+        }
+    ],
+    "homepage": "https://github.com/ermetix/laravel-logger",
+    "support": {
+        "issues": "https://github.com/ermetix/laravel-logger/issues",
+        "source": "https://github.com/ermetix/laravel-logger"
+    }
+}

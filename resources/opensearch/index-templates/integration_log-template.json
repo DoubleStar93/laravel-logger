@@ -1,0 +1,102 @@
+{
+  "index_patterns": ["integration_log*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "parent_request_id": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword"
+        },
+        "app_version": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "integration_name": {
+          "type": "keyword"
+        },
+        "url": {
+          "type": "keyword"
+        },
+        "method": {
+          "type": "keyword"
+        },
+        "status": {
+          "type": "integer"
+        },
+        "duration_ms": {
+          "type": "integer"
+        },
+        "external_id": {
+          "type": "keyword"
+        },
+        "correlation_id": {
+          "type": "keyword"
+        },
+        "attempt": {
+          "type": "integer"
+        },
+        "max_attempts": {
+          "type": "integer"
+        },
+        "request_size_bytes": {
+          "type": "integer"
+        },
+        "response_size_bytes": {
+          "type": "integer"
+        },
+        "request_body": {
+          "type": "text"
+        },
+        "response_body": {
+          "type": "text"
+        },
+        "headers": {
+          "type": "object",
+          "dynamic": true
+        },
+        "error_message": {
+          "type": "text"
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 6,
+  "_meta": {
+    "description": "Template for integration_log index with strict mapping - fields at root level"
+  }
+}

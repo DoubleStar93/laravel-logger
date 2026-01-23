@@ -1,0 +1,43 @@
+{
+  "policy": {
+    "description": "Simple retention policy: delete indices older than 30 days.",
+    "default_state": "hot",
+    "states": [
+      {
+        "name": "hot",
+        "actions": [],
+        "transitions": [
+          {
+            "state_name": "delete",
+            "conditions": {
+              "min_index_age": "30d"
+            }
+          }
+        ]
+      },
+      {
+        "name": "delete",
+        "actions": [
+          {
+            "delete": {}
+          }
+        ],
+        "transitions": []
+      }
+    ],
+    "ism_template": [
+      {
+      "index_patterns": [
+        "api_log*",
+        "general_log*",
+        "cron_log*",
+        "integration_log*",
+        "orm_log*",
+        "error_log*"
+      ],
+        "priority": 100
+      }
+    ]
+  }
+}
+

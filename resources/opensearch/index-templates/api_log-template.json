@@ -1,0 +1,118 @@
+{
+  "index_patterns": ["api_log*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "parent_request_id": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword"
+        },
+        "app_version": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "method": {
+          "type": "keyword"
+        },
+        "path": {
+          "type": "keyword"
+        },
+        "route_name": {
+          "type": "keyword"
+        },
+        "status": {
+          "type": "integer"
+        },
+        "duration_ms": {
+          "type": "integer"
+        },
+        "ip": {
+          "type": "ip"
+        },
+        "user_id": {
+          "type": "keyword"
+        },
+        "user_agent": {
+          "type": "text"
+        },
+        "referer": {
+          "type": "keyword"
+        },
+        "query_string": {
+          "type": "text",
+          "index": false
+        },
+        "request_size_bytes": {
+          "type": "integer"
+        },
+        "response_size_bytes": {
+          "type": "integer"
+        },
+        "authentication_method": {
+          "type": "keyword"
+        },
+        "api_version": {
+          "type": "keyword"
+        },
+        "correlation_id": {
+          "type": "keyword"
+        },
+        "request_body": {
+          "type": "text",
+          "index": false
+        },
+        "response_body": {
+          "type": "text",
+          "index": false
+        },
+        "request_headers": {
+          "type": "text",
+          "index": false
+        },
+        "response_headers": {
+          "type": "text",
+          "index": false
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 8,
+  "_meta": {
+    "description": "Template for api_log index with strict mapping - fields at root level"
+  }
+}
