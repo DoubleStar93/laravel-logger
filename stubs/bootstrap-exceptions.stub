@@ -1,0 +1,43 @@
+    ->withExceptions(function (Exceptions $exceptions): void {
+        // Exception logging handled automatically by ermetix/laravel-logger package
+        $exceptions->report(function (\Throwable $e) {
+            try {
+                $request = request();
+                
+                // Determine if this is a fatal error that needs immediate logging
+                $isFatal = $e instanceof \Error 
+                    || $e instanceof \ParseError 
+                    || $e instanceof \TypeError
+                    || $e instanceof \ErrorException;
+                
+                \Ermetix\LaravelLogger\Facades\LaravelLogger::error(new \Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject(
+                    message: $e->getMessage(),
+                    stackTrace: $e->getTraceAsString(),
+                    exceptionClass: get_class($e),
+                    file: $e->getFile(),
+                    line: $e->getLine(),
+                    code: $e->getCode(),
+                    previousException: $e->getPrevious() ? [
+                        'class' => get_class($e->getPrevious()),
+                        'message' => $e->getPrevious()->getMessage(),
+                    ] : null,
+                    userId: \Illuminate\Support\Facades\Auth::check() ? (string) \Illuminate\Support\Facades\Auth::id() : null,
+                    route: $request?->route()?->getName(),
+                    method: $request?->getMethod(),
+                    url: $request?->fullUrl(),
+                    level: $isFatal ? 'critical' : 'error',
+                ), defer: !$isFatal); // Defer normal exceptions, write fatal errors immediately
+                
+                // If fatal error, flush deferred logs immediately
+                if ($isFatal && app()->bound(\Ermetix\LaravelLogger\Support\Logging\DeferredLogger::class)) {
+                    app(\Ermetix\LaravelLogger\Support\Logging\DeferredLogger::class)->flush();
+                }
+            } catch (\Throwable $loggingError) {
+                // Fallback to standard logging if package logging fails
+                \Illuminate\Support\Facades\Log::error('Failed to log exception to OpenSearch', [
+                    'original_exception' => $e->getMessage(),
+                    'logging_error' => $loggingError->getMessage(),
+                ]);
+            }
+        });
+    })

@@ -1,0 +1,33 @@
+        // Kafka (via HTTP Kafka REST Proxy)
+        'kafka' => [
+            'driver' => 'custom',
+            'via' => \Ermetix\LaravelLogger\Logging\CreateKafkaLogger::class,
+            'level' => env('LOG_LEVEL', 'debug'),
+            'rest_proxy_url' => env('KAFKA_REST_PROXY_URL', 'http://localhost:8082'),
+            'topic' => env('KAFKA_LOG_TOPIC', 'laravel-logs'),
+            'timeout' => (int) env('KAFKA_LOG_TIMEOUT', 2),
+            'silent' => filter_var(env('KAFKA_LOG_SILENT', true), FILTER_VALIDATE_BOOL),
+            'value_builder' => config('laravel-logger.builders.kafka'),
+        ],
+
+        // index_file (JSONL files: storage/logs/laravel-logger/<index>-YYYY-MM-DD.jsonl)
+        'index_file' => [
+            'driver' => 'custom',
+            'via' => \Ermetix\LaravelLogger\Logging\CreateIndexFileLogger::class,
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        // OpenSearch (single channel, dynamic index chosen by document_builder)
+        'opensearch' => [
+            'driver' => 'custom',
+            'via' => \Ermetix\LaravelLogger\Logging\CreateOpenSearchLogger::class,
+            'level' => env('LOG_LEVEL', 'debug'),
+            'url' => config('laravel-logger.opensearch.url', env('OPENSEARCH_URL', 'http://localhost:9200')),
+            'index' => config('laravel-logger.opensearch.default_index', env('OPENSEARCH_DEFAULT_INDEX', 'general_log')),
+            'username' => config('laravel-logger.opensearch.username', env('OPENSEARCH_USERNAME')),
+            'password' => config('laravel-logger.opensearch.password', env('OPENSEARCH_PASSWORD')),
+            'verify_tls' => config('laravel-logger.opensearch.verify_tls', filter_var(env('OPENSEARCH_VERIFY_TLS', true), FILTER_VALIDATE_BOOL)),
+            'timeout' => config('laravel-logger.opensearch.timeout', (int) env('OPENSEARCH_TIMEOUT', 2)),
+            'silent' => config('laravel-logger.opensearch.silent', filter_var(env('OPENSEARCH_SILENT', true), FILTER_VALIDATE_BOOL)),
+            'document_builder' => config('laravel-logger.builders.opensearch'),
+        ],

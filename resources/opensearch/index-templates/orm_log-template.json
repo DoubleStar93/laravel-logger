@@ -1,0 +1,100 @@
+{
+  "index_patterns": ["orm_log*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "parent_request_id": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword"
+        },
+        "app_version": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "model": {
+          "type": "keyword"
+        },
+        "model_id": {
+          "type": "keyword"
+        },
+        "action": {
+          "type": "keyword"
+        },
+        "query": {
+          "type": "text"
+        },
+        "query_type": {
+          "type": "keyword"
+        },
+        "is_slow_query": {
+          "type": "boolean"
+        },
+        "duration_ms": {
+          "type": "integer"
+        },
+        "bindings": {
+          "type": "text"
+        },
+        "connection": {
+          "type": "keyword"
+        },
+        "table": {
+          "type": "keyword"
+        },
+        "transaction_id": {
+          "type": "keyword"
+        },
+        "user_id": {
+          "type": "keyword"
+        },
+        "previous_value": {
+          "type": "object",
+          "dynamic": true
+        },
+        "after_value": {
+          "type": "object",
+          "dynamic": true
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 7,
+  "_meta": {
+    "description": "Template for orm_log index with strict mapping - fields at root level"
+  }
+}

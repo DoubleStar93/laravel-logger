@@ -1,0 +1,86 @@
+{
+  "index_patterns": ["cron_log*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "parent_request_id": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword"
+        },
+        "app_version": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "job": {
+          "type": "keyword"
+        },
+        "job_id": {
+          "type": "keyword"
+        },
+        "queue_name": {
+          "type": "keyword"
+        },
+        "attempts": {
+          "type": "integer"
+        },
+        "max_attempts": {
+          "type": "integer"
+        },
+        "command": {
+          "type": "keyword"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "duration_ms": {
+          "type": "integer"
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "memory_peak_mb": {
+          "type": "float"
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 6,
+  "_meta": {
+    "description": "Template for cron_log index with strict mapping - fields at root level"
+  }
+}
