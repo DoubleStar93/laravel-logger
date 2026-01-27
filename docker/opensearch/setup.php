@@ -263,15 +263,17 @@ if ($withDashboards) {
             echo "   Essential fields will be automatically visible in Dashboards\n";
             sleep(5);
             
-            // Create default saved searches with visible columns for each pattern
+            // Configure default fields visibility (skip saved searches to avoid undefined field errors)
             echo "\n";
-            echo "⚙️  Creating default saved searches with visible columns...\n";
+            echo "⚙️  Configuring default fields visibility...\n";
             foreach ($indexPatterns as $id => $pattern) {
                 if (isset($pattern['defaultFields']) && !empty($pattern['defaultFields'])) {
-                    if (createDefaultSavedSearch($dashboardsUrl, $id, $pattern['title'], $pattern['defaultFields'])) {
-                        echo "   ✅ Default saved search created for {$pattern['title']}\n";
+                    // Only configure field visibility, don't create saved searches
+                    // Saved searches can cause JavaScript errors if fields are undefined in some documents
+                    if (configureDefaultFields($dashboardsUrl, $id, $pattern['defaultFields'])) {
+                        echo "   ✅ Default fields configured for {$pattern['title']}\n";
                     } else {
-                        echo "   ⚠️  Could not create default saved search for {$pattern['title']}\n";
+                        echo "   ⚠️  Could not configure default fields for {$pattern['title']}\n";
                     }
                 }
             }
