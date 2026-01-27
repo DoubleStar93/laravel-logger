@@ -60,7 +60,7 @@ echo "\n";
 $templates = [
     'api_log-template' => 'api_log-template.json',
     'general_log-template' => 'general_log-template.json',
-    'cron_log-template' => 'cron_log-template.json',
+    'job_log-template' => 'job_log-template.json',
     'integration_log-template' => 'integration_log-template.json',
     'orm_log-template' => 'orm_log-template.json',
     'error_log-template' => 'error_log-template.json',
@@ -155,10 +155,10 @@ if ($withDashboards) {
                     'request_id',
                 ],
             ],
-            'cron_log' => [
-                'title' => 'cron_log*',
+            'job_log' => [
+                'title' => 'job_log*',
                 'timeFieldName' => '@timestamp',
-                'description' => 'Cron job and scheduled task logs',
+                'description' => 'Job and scheduled task logs',
                 'defaultFields' => [
                     '@timestamp',
                     'job',
@@ -166,6 +166,8 @@ if ($withDashboards) {
                     'status',
                     'duration_ms',
                     'exit_code',
+                    'frequency',
+                    'output',
                     'level',
                     'request_id',
                 ],
@@ -935,7 +937,7 @@ function createTestDocumentForPattern(string $patternBase): array
             ]);
             break;
             
-        case 'cron_log':
+        case 'job_log':
             $doc = array_merge($doc, [
                 'job' => 'test_job',
                 'command' => 'php artisan test:command',
@@ -943,6 +945,8 @@ function createTestDocumentForPattern(string $patternBase): array
                 'duration_ms' => 1200,
                 'exit_code' => 0,
                 'memory_peak_mb' => 128.5,
+                'frequency' => '*/5 * * * *',
+                'output' => 'Test job completed successfully',
             ]);
             break;
             

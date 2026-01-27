@@ -2,7 +2,7 @@
 
 use Ermetix\LaravelLogger\Support\Logging\Objects\ApiLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\GeneralLogObject;
-use Ermetix\LaravelLogger\Support\Logging\Objects\CronLogObject;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\IntegrationLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\OrmLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
@@ -10,14 +10,14 @@ use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
 test('All LogObjects toArray excludes null values', function () {
     $apiLog = new ApiLogObject(message: 'test');
     $generalLog = new GeneralLogObject(message: 'test');
-    $cronLog = new CronLogObject(message: 'test');
+    $jobLog = new JobLogObject(message: 'test');
     $integrationLog = new IntegrationLogObject(message: 'test');
     $ormLog = new OrmLogObject(message: 'test');
     $errorLog = new ErrorLogObject(message: 'test');
     
     $apiArray = $apiLog->toArray();
     $generalArray = $generalLog->toArray();
-    $cronArray = $cronLog->toArray();
+    $jobArray = $jobLog->toArray();
     $integrationArray = $integrationLog->toArray();
     $ormArray = $ormLog->toArray();
     $errorArray = $errorLog->toArray();
@@ -25,7 +25,7 @@ test('All LogObjects toArray excludes null values', function () {
     // None should contain null values
     expect($apiArray)->not->toContain(null);
     expect($generalArray)->not->toContain(null);
-    expect($cronArray)->not->toContain(null);
+    expect($jobArray)->not->toContain(null);
     expect($integrationArray)->not->toContain(null);
     expect($ormArray)->not->toContain(null);
     expect($errorArray)->not->toContain(null);
@@ -99,8 +99,8 @@ test('GeneralLogObject toArray includes message and source location', function (
     expect($array)->toHaveKey('function', 'testFunction');
 });
 
-test('CronLogObject toArray includes all cron-specific fields', function () {
-    $log = new CronLogObject(
+test('JobLogObject toArray includes all job-specific fields', function () {
+    $log = new JobLogObject(
         message: 'job_completed',
         job: 'test:job',
         jobId: 'job-123',
@@ -112,6 +112,8 @@ test('CronLogObject toArray includes all cron-specific fields', function () {
         durationMs: 1000,
         exitCode: 0,
         memoryPeakMb: 128.5,
+        frequency: '*/5 * * * *',
+        output: 'Job completed successfully',
     );
     
     $array = $log->toArray();
@@ -126,6 +128,8 @@ test('CronLogObject toArray includes all cron-specific fields', function () {
     expect($array)->toHaveKey('duration_ms', 1000);
     expect($array)->toHaveKey('exit_code', 0);
     expect($array)->toHaveKey('memory_peak_mb', 128.5);
+    expect($array)->toHaveKey('frequency', '*/5 * * * *');
+    expect($array)->toHaveKey('output', 'Job completed successfully');
 });
 
 test('IntegrationLogObject toArray includes all integration-specific fields', function () {

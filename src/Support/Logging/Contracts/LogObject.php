@@ -5,7 +5,7 @@ namespace Ermetix\LaravelLogger\Support\Logging\Contracts;
 interface LogObject
 {
     /**
-     * One of: api_log, general_log, cron_log, integration_log, orm_log, error_log
+     * One of: api_log, general_log, job_log, integration_log, orm_log, error_log
      */
     public function index(): string;
 

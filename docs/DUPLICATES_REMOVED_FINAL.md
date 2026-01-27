@@ -11,16 +11,12 @@ Tutti i file duplicati sono stati rimossi dalla root del progetto. Tutto è ora 
 - ❌ `docker/opensearch/` (root) - Duplicato
   - `setup.php`
   - `setup-dashboards.php`
-  - `setup.sh`
-  - `setup.ps1`
   - `README.md`
 
 **Tutti questi file sono ora solo nel package:**
 - ✅ `packages/laravel-logger/docker/opensearch/docker-compose.example.yml`
 - ✅ `packages/laravel-logger/docker/opensearch/setup.php`
 - ✅ `packages/laravel-logger/docker/opensearch/setup-dashboards.php`
-- ✅ `packages/laravel-logger/docker/opensearch/setup.sh`
-- ✅ `packages/laravel-logger/docker/opensearch/setup.ps1`
 - ✅ `packages/laravel-logger/docker/opensearch/README.md`
 
 ## Utilizzo
@@ -52,8 +48,6 @@ progetto/
 │   │       ├── docker-compose.example.yml
 │   │       ├── setup.php
 │   │       ├── setup-dashboards.php
-│   │       ├── setup.sh
-│   │       ├── setup.ps1
 │   │       └── README.md
 │   └── ...
 └── (nessun file Docker duplicato) ✅

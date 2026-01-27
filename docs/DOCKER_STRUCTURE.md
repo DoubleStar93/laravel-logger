@@ -11,8 +11,6 @@ packages/laravel-logger/
         ├── docker-compose.example.yml  # Configurazione Docker Compose
         ├── setup.php                   # Script PHP per template e policy
         ├── setup-dashboards.php        # Script per index patterns
-        ├── setup.sh                    # Script shell (Linux/macOS)
-        ├── setup.ps1                   # Script PowerShell (Windows)
         ├── README.md                   # Documentazione setup
         └── .env.example                # Esempio variabili ambiente
 ```

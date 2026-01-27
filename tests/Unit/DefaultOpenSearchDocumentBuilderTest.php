@@ -22,7 +22,7 @@ test('DefaultOpenSearchDocumentBuilder chooses index from context/extra with fal
         level: Level::Info,
         message: 'm',
         context: [],
-        extra: ['log_index' => 'cron_log'],
+        extra: ['log_index' => 'job_log'],
     );
 
     $fallback = new LogRecord(
@@ -35,7 +35,7 @@ test('DefaultOpenSearchDocumentBuilder chooses index from context/extra with fal
     );
 
     expect($builder->index($fromContext))->toBe('api_log');
-    expect($builder->index($fromExtra))->toBe('cron_log');
+    expect($builder->index($fromExtra))->toBe('job_log');
     expect($builder->index($fallback))->toBe('general_log');
 });
 

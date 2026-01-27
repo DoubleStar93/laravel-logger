@@ -13,7 +13,7 @@ class VerifyOpenSearchData extends Command
     public function handle(): int
     {
         $opensearchUrl = env('OPENSEARCH_URL', 'http://localhost:9200');
-        $indices = ['api_log', 'general_log', 'cron_log', 'integration_log', 'orm_log', 'error_log'];
+        $indices = ['api_log', 'general_log', 'job_log', 'integration_log', 'orm_log', 'error_log'];
 
         $this->info('🔍 Verifying OpenSearch indices...');
         $this->newLine();

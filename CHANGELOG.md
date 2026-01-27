@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release of Laravel Logger package
-- Typed logging with dedicated LogObject classes (GeneralLogObject, ApiLogObject, CronLogObject, IntegrationLogObject, OrmLogObject, ErrorLogObject)
+- Typed logging with dedicated LogObject classes (GeneralLogObject, ApiLogObject, JobLogObject, IntegrationLogObject, OrmLogObject, ErrorLogObject)
 - OpenSearch integration with dynamic index routing
 - Kafka support via REST Proxy
 - Index file channel for JSONL file logging
 - Deferred logging with auto-flush mechanism
-- Multiple log indices: api_log, general_log, cron_log, integration_log, orm_log, error_log
+- Multiple log indices: api_log, general_log, job_log, integration_log, orm_log, error_log
 - Automatic request_id propagation
 - Automatic error logging with fatal error support
 - JSON pretty printing for request/response bodies and headers

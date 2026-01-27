@@ -56,13 +56,15 @@ Dopo aver eseguito lo script di setup, devi configurare manualmente le colonne v
 - `level`
 - `request_id`
 
-### cron_log*
+### job_log*
 - `@timestamp`
 - `job`
 - `command`
 - `status`
 - `duration_ms`
 - `exit_code`
+- `frequency`
+- `output`
 - `level`
 - `request_id`
 

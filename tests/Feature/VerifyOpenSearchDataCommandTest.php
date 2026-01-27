@@ -6,7 +6,7 @@ test('opensearch:verify uses configured URL and handles mixed index states', fun
     $base = 'http://opensearch.test';
     putenv("OPENSEARCH_URL={$base}");
 
-    $indices = ['api_log', 'general_log', 'cron_log', 'integration_log', 'orm_log', 'error_log'];
+    $indices = ['api_log', 'general_log', 'job_log', 'integration_log', 'orm_log', 'error_log'];
 
     $map = [];
 
@@ -18,8 +18,8 @@ test('opensearch:verify uses configured URL and handles mixed index states', fun
     $map["{$base}/general_log"] = '{}';
     $map["{$base}/general_log/_count"] = json_encode(['count' => 0]);
 
-    // cron_log does not exist
-    $map["{$base}/cron_log"] = false;
+    // job_log does not exist
+    $map["{$base}/job_log"] = false;
 
     // integration_log exists but count endpoint fails
     $map["{$base}/integration_log"] = '{}';

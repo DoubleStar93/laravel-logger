@@ -2,9 +2,8 @@
 
 Questa directory contiene tutti i file necessari per avviare OpenSearch e OpenSearch Dashboards localmente:
 - `docker-compose.example.yml` - Configurazione Docker Compose
-- `setup.php` - Script per applicare template e policy
+- `setup.php` - Script cross-platform per applicare template e policy
 - `setup-dashboards.php` - Script per creare index patterns
-- `setup.sh` / `setup.ps1` - Script shell alternativi
 
 ## Avvio rapido
 
@@ -53,12 +52,10 @@ php docker/opensearch/setup.php --with-dashboards
 
 **Nota:** I template sono gestiti dal package e non devono essere duplicati nella root del progetto.
 
-**Alternative:**
-- **Linux/macOS:** `bash docker/opensearch/setup.sh` (usa lo script PHP per compatibilità cross-platform)
-- **Windows (PowerShell):** `.\docker\opensearch\setup.ps1`
+**Nota:** Lo script PHP è cross-platform e funziona su Windows, Linux e macOS. Non sono necessari script alternativi.
 
 Lo script applica:
-- 6 index template (api_log, general_log, cron_log, integration_log, orm_log, error_log)
+- 6 index template (api_log, general_log, job_log, integration_log, orm_log, error_log)
 - ISM retention policy
 - (Opzionale con `--with-dashboards`) Index pattern in OpenSearch Dashboards
 
@@ -81,7 +78,7 @@ php docker/opensearch/setup-dashboards.php
 Entrambi creano automaticamente tutti gli index pattern necessari:
 - `api_log*`
 - `general_log*`
-- `cron_log*`
+- `job_log*`
 - `integration_log*`
 - `orm_log*`
 - `error_log*`
@@ -132,9 +129,9 @@ curl -X PUT "http://localhost:9200/_index_template/general_log-template" \
   -H "Content-Type: application/json" \
   -d @opensearch/index-templates/general_log-template.json
 
-curl -X PUT "http://localhost:9200/_index_template/cron_log-template" \
+curl -X PUT "http://localhost:9200/_index_template/job_log-template" \
   -H "Content-Type: application/json" \
-  -d @opensearch/index-templates/cron_log-template.json
+  -d @opensearch/index-templates/job_log-template.json
 
 curl -X PUT "http://localhost:9200/_index_template/integration_log-template" \
   -H "Content-Type: application/json" \

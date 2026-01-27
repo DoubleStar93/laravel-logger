@@ -9,21 +9,21 @@ flowchart TB
 
   Type --> Api[ApiLogObject]
   Type --> General[GeneralLogObject]
-  Type --> Cron[CronLogObject]
+  Type --> Job[JobLogObject]
   Type --> Integration[IntegrationLogObject]
   Type --> Orm[OrmLogObject]
   Type --> Err[ErrorLogObject]
 
   Api -->|"log_index=api_log"| OS_api[(api_log)]
   General -->|"log_index=general_log"| OS_general[(general_log)]
-  Cron -->|"log_index=cron_log"| OS_cron[(cron_log)]
+  Job -->|"log_index=job_log"| OS_job[(job_log)]
   Integration -->|"log_index=integration_log"| OS_integration[(integration_log)]
   Orm -->|"log_index=orm_log"| OS_orm[(orm_log)]
   Err -->|"log_index=error_log"| OS_error[(error_log)]
 
   Templates[OpenSearch_index_templates] -.-> OS_api
   Templates -.-> OS_general
-  Templates -.-> OS_cron
+  Templates -.-> OS_job
   Templates -.-> OS_integration
   Templates -.-> OS_orm
   Templates -.-> OS_error

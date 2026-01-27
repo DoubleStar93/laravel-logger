@@ -25,8 +25,6 @@ php artisan opensearch:verify
 - ✅ `docker/opensearch/` → `packages/laravel-logger/docker/opensearch/`
   - `setup.php`
   - `setup-dashboards.php`
-  - `setup.sh`
-  - `setup.ps1`
   - `README.md`
 
 - ✅ `docker-compose.yml` (OpenSearch services) → `packages/laravel-logger/docker/docker-compose.example.yml`

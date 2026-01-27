@@ -8,7 +8,7 @@ All logging methods require a specific `LogObject` type, ensuring type safety:
 use Ermetix\LaravelLogger\Facades\LaravelLogger as Log;
 use Ermetix\LaravelLogger\Support\Logging\Objects\GeneralLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ApiLogObject;
-use Ermetix\LaravelLogger\Support\Logging\Objects\CronLogObject;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\IntegrationLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\OrmLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
@@ -35,8 +35,11 @@ Log::api(new ApiLogObject(
     userId: '123',
 ));
 
-// Cron log
-Log::cron(new CronLogObject(
+// Job log (automatic logging is enabled by default)
+// Jobs are automatically logged when they complete or fail.
+// You can also manually log job events:
+
+Log::job(new JobLogObject(
     message: 'scheduled_task_completed',
     job: 'SendDailyReport',
     command: 'app:send-daily-report',
@@ -44,6 +47,8 @@ Log::cron(new CronLogObject(
     durationMs: 1200,
     exitCode: 0,
     memoryPeakMb: 128.5,
+    frequency: 'daily',
+    output: 'Daily report sent successfully',
 ));
 
 // Integration log
@@ -175,7 +180,23 @@ The `RequestId` middleware automatically adds a `request_id` to all logs:
 The package automatically logs:
 
 1. **API Requests**: Via `ApiAccessLog` middleware (logs to `api_log`)
-2. **Exceptions**: Via exception handler (logs to `error_log`)
-3. **Fatal Errors**: Via shutdown handler (logs to `error_log` immediately)
+2. **Job Execution**: Via `LogJobEvents` listener (logs to `job_log`) - enabled by default
+3. **Exceptions**: Via exception handler (logs to `error_log`)
+4. **Fatal Errors**: Via shutdown handler (logs to `error_log` immediately)
 
-All automatic logs use deferred logging (except fatal errors) to avoid blocking execution.
+All automatic logs use deferred logging (except fatal errors and job logs) to avoid blocking execution.
+
+### Job Logging Configuration
+
+Job logging is enabled by default. To disable it, set in `.env`:
+```env
+LOG_JOB_ENABLED=false
+```
+
+The automatic job logger tracks:
+- Job name, ID, and queue
+- Execution duration and memory usage
+- Status (success/failed) and exit code
+- Attempts and max attempts
+- Whether it's a cron job (scheduled command)
+- Error messages for failed jobs

@@ -131,7 +131,7 @@ Oppure usa l'API OpenSearch per configurare i campi default programmaticamente.
 
 ---
 
-## cron_log
+## job_log
 
 **Campi essenziali (mostrare di default):**
 
@@ -141,8 +141,10 @@ Oppure usa l'API OpenSearch per configurare i campi default programmaticamente.
 4. `status` - Status (success, failed, etc.)
 5. `duration_ms` - Durata esecuzione (ms)
 6. `exit_code` - Exit code
-7. `level` - Livello log
-8. `request_id` - ID correlazione
+7. `frequency` - Frequenza di esecuzione (per cron jobs)
+8. `output` - Output del job
+9. `level` - Livello log
+10. `request_id` - ID correlazione
 
 **Campi opzionali (utili per monitoraggio):**
 - `job_id` - ID job
@@ -205,7 +207,7 @@ Oppure usa l'API OpenSearch per configurare i campi default programmaticamente.
 
 ### Campi rimossi (ridondanti):
 - ❌ `message` - Rimosso da tutti tranne `general_log` (campi strutturati più utili)
-- ❌ `file`, `line`, `class`, `function` - Rimossi da `api_log`, `orm_log`, `integration_log`, `cron_log`, `error_log`
+- ❌ `file`, `line`, `class`, `function` - Rimossi da `api_log`, `orm_log`, `integration_log`, `job_log`, `error_log`
   - ✅ Mantenuti solo in `general_log` (utili per debug eventi generici)
   - ✅ `error_log` ha `stack_trace` che contiene tutto
 

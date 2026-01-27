@@ -26,7 +26,7 @@ flowchart LR
     OS["OpenSearch"]
     OS_api[(api_log)]
     OS_general[(general_log)]
-    OS_cron[(cron_log)]
+    OS_job[(job_log)]
     OS_integration[(integration_log)]
     OS_orm[(orm_log)]
     OS_error[(error_log)]
@@ -44,7 +44,7 @@ flowchart LR
 
   OS --> OS_api
   OS --> OS_general
-  OS --> OS_cron
+  OS --> OS_job
   OS --> OS_integration
   OS --> OS_orm
   OS --> OS_error

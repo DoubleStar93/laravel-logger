@@ -1,10 +1,10 @@
-## OpenSearch logging design (api_log / general_log / cron_log / integration_log / orm_log)
+## OpenSearch logging design (api_log / general_log / job_log / integration_log / orm_log)
 
 Here we model your "collections" as **real OpenSearch indices**:
 
 - `api_log` (API access + API domain logs)
 - `general_log` (generic application events)
-- `cron_log` (scheduled jobs / cron / background tasks)
+- `job_log` (jobs / scheduled tasks / cron / background tasks)
 - `integration_log` (calls to external integrations)
 - `orm_log` (ORM/Eloquent operations: queries, model changes)
 
@@ -24,7 +24,7 @@ Provided as separate JSON templates (one per index) with **strict mapping** (dyn
 
 - `opensearch/index-templates/api_log-template.json`
 - `opensearch/index-templates/general_log-template.json`
-- `opensearch/index-templates/cron_log-template.json`
+- `opensearch/index-templates/job_log-template.json`
 - `opensearch/index-templates/integration_log-template.json`
 - `opensearch/index-templates/orm_log-template.json`
 
@@ -42,7 +42,7 @@ Provided example policy (delete after 30 days):
 
 Configured channels (see `config/logging.php`):
 
-- `opensearch` → indexes into `api_log`, `general_log`, `cron_log`, `integration_log`, `orm_log`
+- `opensearch` → indexes into `api_log`, `general_log`, `job_log`, `integration_log`, `orm_log`
 
 Index routing is controlled by the log context field `log_index` (or via `extra.log_index`).
 
@@ -58,14 +58,13 @@ Create templates (apply all 5):
 ```bash
 PUT _index_template/api_log-template
 PUT _index_template/general_log-template
-PUT _index_template/cron_log-template
+PUT _index_template/job_log-template
 PUT _index_template/integration_log-template
 PUT _index_template/orm_log-template
 ```
 
 Or use the automated setup scripts:
-- `bash docker/opensearch/setup.sh` (Linux/macOS)
-- `.\docker\opensearch\setup.ps1` (Windows PowerShell)
+- `php docker/opensearch/setup.php` (cross-platform, funziona su Windows, Linux e macOS)
 
 Create ISM policy:
 
@@ -81,7 +80,7 @@ All logs for a request:
 
 Or across all indices:
 
-`GET api_log,general_log,cron_log,integration_log,orm_log/_search`
+`GET api_log,general_log,job_log,integration_log,orm_log/_search`
 
 Query ORM operations for a specific model:
 

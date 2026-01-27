@@ -31,7 +31,7 @@ Questi campi dovrebbero essere disponibili in tutti i template per correlazione 
 
 ### Performance/Monitoring
 - `memory_usage_mb` (float) - Memoria usata al momento del log
-- `memory_peak_mb` (float) - Picco memoria (già presente in cron_log)
+- `memory_peak_mb` (float) - Picco memoria (già presente in job_log)
 
 ### Categorizzazione
 - `tags` (keyword, array) - Tag per categorizzazione/filtri (es. ["payment", "critical"])
@@ -66,7 +66,7 @@ Questi campi dovrebbero essere disponibili in tutti i template per correlazione 
 - `feature` (keyword) - Feature/modulo dell'app (es. "checkout", "user-management")
 - `action_type` (keyword) - Tipo azione (create, update, delete, read, custom)
 
-### cron_log
+### job_log
 
 **Job context**:
 - `job_id` (keyword) - ID univoco del job (se disponibile)

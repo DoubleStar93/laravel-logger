@@ -37,10 +37,10 @@ $indexPatterns = [
         'timeFieldName' => '@timestamp',
         'description' => 'General application logs',
     ],
-    'cron_log' => [
-        'title' => 'cron_log*',
+    'job_log' => [
+        'title' => 'job_log*',
         'timeFieldName' => '@timestamp',
-        'description' => 'Cron job and scheduled task logs',
+        'description' => 'Job and scheduled task logs',
     ],
     'integration_log' => [
         'title' => 'integration_log*',

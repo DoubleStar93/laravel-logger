@@ -71,9 +71,9 @@ Template: `resources/opensearch/index-templates/general_log-template.json`
 | `feature` | `keyword` | feature area |
 | `action_type` | `keyword` | action |
 
-## cron_log
+## job_log
 
-Template: `resources/opensearch/index-templates/cron_log-template.json`
+Template: `resources/opensearch/index-templates/job_log-template.json`
 
 | Field | Type | Notes |
 |---|---:|---|
@@ -87,6 +87,8 @@ Template: `resources/opensearch/index-templates/cron_log-template.json`
 | `duration_ms` | `integer` | duration |
 | `exit_code` | `integer` | exit |
 | `memory_peak_mb` | `float` | memory peak |
+| `frequency` | `keyword` | execution frequency (cron expression or description, e.g. "daily", "*/5 * * * *") |
+| `output` | `text` | job output |
 
 ## integration_log
 

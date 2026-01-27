@@ -105,15 +105,15 @@ class DefaultOpenSearchDocumentBuilder implements OpenSearchDocumentBuilder
         }
 
         // Source location (file, line, class, function) from backtrace if not already present
-        // Skip for api_log, orm_log, integration_log, cron_log, error_log as these fields are not useful:
+        // Skip for api_log, orm_log, integration_log, job_log, error_log as these fields are not useful:
         // - api_log: would always point to middleware
         // - orm_log: would always point to LogDatabaseQuery listener
         // - integration_log: would always point to Log::integration() call
-        // - cron_log: would always point to Log::cron() call
+        // - job_log: would always point to Log::job()/Log::cron() call
         // - error_log: stack_trace already contains all location info for every frame
         // Only include for general_log (debug)
         $index = $this->index($record);
-        $skipSourceLocation = in_array($index, ['api_log', 'orm_log', 'integration_log', 'cron_log', 'error_log'], true);
+        $skipSourceLocation = in_array($index, ['api_log', 'orm_log', 'integration_log', 'job_log', 'error_log'], true);
         if (!$skipSourceLocation && (!isset($doc['file']) || !isset($doc['line'])) && function_exists('debug_backtrace')) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
             

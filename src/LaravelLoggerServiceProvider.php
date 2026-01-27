@@ -62,6 +62,9 @@ class LaravelLoggerServiceProvider extends ServiceProvider
                 $app->make(\Ermetix\LaravelLogger\Support\Logging\DeferredLogger::class)
             );
         });
+        $this->app->bind(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class, function () {
+            return new \Ermetix\LaravelLogger\Listeners\LogJobEvents();
+        });
     }
 
     /**
@@ -159,6 +162,46 @@ class LaravelLoggerServiceProvider extends ServiceProvider
             \Illuminate\Queue\Events\JobProcessing::class,
             \Ermetix\LaravelLogger\Listeners\PropagateRequestIdToJob::class,
         );
+
+        // Automatically log job execution events to job_log
+        if (config('laravel-logger.job.enabled', true)) {
+            $app = $this->app;
+            \Illuminate\Support\Facades\Event::listen(
+                \Illuminate\Queue\Events\JobProcessing::class,
+                function (\Illuminate\Queue\Events\JobProcessing $event) use ($app) {
+                    try {
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+                        $listener->handleJobProcessing($event);
+                    } catch (\Throwable $e) {
+                        // Silently fail to avoid breaking job execution
+                    }
+                },
+            );
+
+            \Illuminate\Support\Facades\Event::listen(
+                \Illuminate\Queue\Events\JobProcessed::class,
+                function (\Illuminate\Queue\Events\JobProcessed $event) use ($app) {
+                    try {
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+                        $listener->handleJobProcessed($event);
+                    } catch (\Throwable $e) {
+                        // Silently fail to avoid breaking job execution
+                    }
+                },
+            );
+
+            \Illuminate\Support\Facades\Event::listen(
+                \Illuminate\Queue\Events\JobFailed::class,
+                function (\Illuminate\Queue\Events\JobFailed $event) use ($app) {
+                    try {
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+                        $listener->handleJobFailed($event);
+                    } catch (\Throwable $e) {
+                        // Silently fail to avoid breaking job execution
+                    }
+                },
+            );
+        }
 
         // Flush deferred logs after jobs complete
         \Illuminate\Support\Facades\Event::listen(

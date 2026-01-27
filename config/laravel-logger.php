@@ -52,6 +52,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Job Logging
+    |--------------------------------------------------------------------------
+    |
+    | Automatically log job execution events (JobProcessed, JobFailed) to job_log index.
+    | Tracks job name, duration, status, attempts, memory usage, and more.
+    |
+    */
+    'job' => [
+        'enabled' => filter_var(env('LOG_JOB_ENABLED', true), FILTER_VALIDATE_BOOL),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | ORM/Database Query Logging
     |--------------------------------------------------------------------------
     |

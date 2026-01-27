@@ -2,7 +2,7 @@
 
 use Ermetix\LaravelLogger\Support\Logging\Objects\ApiLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\GeneralLogObject;
-use Ermetix\LaravelLogger\Support\Logging\Objects\CronLogObject;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\IntegrationLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\OrmLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
@@ -36,20 +36,24 @@ test('api log object contains all required fields', function () {
     expect($log->durationMs())->toBe(45);
 });
 
-test('cron log object contains job information', function () {
-    $log = new CronLogObject(
+test('job log object contains job information', function () {
+    $log = new JobLogObject(
         message: 'job_completed',
         job: 'test:job',
         command: 'php artisan test:job',
         status: 'ok',
         durationMs: 1000,
+        frequency: 'hourly',
+        output: 'Job completed successfully',
         level: 'info',
     );
     
-    expect($log->index())->toBe('cron_log');
+    expect($log->index())->toBe('job_log');
     expect($log->job())->toBe('test:job');
     expect($log->command())->toBe('php artisan test:job');
     expect($log->status())->toBe('ok');
+    expect($log->frequency())->toBe('hourly');
+    expect($log->output())->toBe('Job completed successfully');
 });
 
 test('integration log object contains integration details', function () {

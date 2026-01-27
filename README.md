@@ -44,7 +44,7 @@ That's it! The package is now configured and ready to use. See [Installation](#i
 - ✅ **Kafka Support**: Log to Kafka via REST Proxy ([Kafka Setup](docker/kafka/README.md))
 - ✅ **Index File Channel**: Log to JSONL files via `index_file` channel
 - ✅ **Deferred Logging**: Non-blocking in-memory log accumulation ([Deferred Logging Guide](docs/AUTO_FLUSH_MECHANISM.md))
-- ✅ **Multiple Indices**: api_log, general_log, cron_log, integration_log, orm_log, error_log ([Index Schema](docs/opensearch-index-schema.md))
+- ✅ **Multiple Indices**: api_log, general_log, job_log, integration_log, orm_log, error_log ([Index Schema](docs/opensearch-index-schema.md))
 - ✅ **Request Correlation**: Automatic request_id propagation
 - ✅ **Error Handling**: Automatic error logging with fatal error support
 - ✅ **JSON Pretty Printing**: Automatic formatting of JSON fields (request_body, response_body, headers)
@@ -241,7 +241,7 @@ php packages/laravel-logger/docker/opensearch/setup.php --with-dashboards
 ```
 
 This command will:
-- ✅ Apply 6 index templates (api_log, general_log, cron_log, integration_log, orm_log, error_log)
+- ✅ Apply 6 index templates (api_log, general_log, job_log, integration_log, orm_log, error_log)
 - ✅ Apply ISM retention policy
 - ✅ Create index patterns in OpenSearch Dashboards
 - ✅ Configure default sort order (timestamp descending)
@@ -253,10 +253,7 @@ This command will:
 php packages/laravel-logger/docker/opensearch/setup.php
 ```
 
-**Alternative scripts:**
-
-- **Linux/macOS:** `bash packages/laravel-logger/docker/opensearch/setup.sh`
-- **Windows (PowerShell):** `.\packages\laravel-logger\docker\opensearch\setup.ps1`
+**Nota:** Lo script PHP è cross-platform e funziona su Windows, Linux e macOS.
 
 ### Step 4: Access OpenSearch Dashboards
 
@@ -273,7 +270,7 @@ After running the setup script:
 2. Add these recommended fields:
    - **api_log***: `@timestamp`, `method`, `path`, `route_name`, `status`, `duration_ms`, `user_id`, `ip`, `request_id`
    - **general_log***: `@timestamp`, `message`, `event`, `entity_type`, `entity_id`, `action_type`, `user_id`, `level`, `request_id`
-   - **cron_log***: `@timestamp`, `job`, `command`, `status`, `duration_ms`, `exit_code`, `level`, `request_id`
+   - **job_log***: `@timestamp`, `job`, `command`, `status`, `duration_ms`, `exit_code`, `frequency`, `output`, `level`, `request_id`
    - **integration_log***: `@timestamp`, `integration_name`, `url`, `method`, `status`, `duration_ms`, `level`, `request_id`
    - **orm_log***: `@timestamp`, `model`, `action`, `query_type`, `table`, `duration_ms`, `is_slow_query`, `user_id`, `request_id`
    - **error_log***: `@timestamp`, `exception_class`, `code`, `level`, `context_route`, `context_method`, `context_url`, `context_user_id`, `request_id`
@@ -381,9 +378,9 @@ curl -X PUT "http://localhost:9200/_index_template/general_log-template" \
   -H "Content-Type: application/json" \
   -d @packages/laravel-logger/resources/opensearch/index-templates/general_log-template.json
 
-curl -X PUT "http://localhost:9200/_index_template/cron_log-template" \
+curl -X PUT "http://localhost:9200/_index_template/job_log-template" \
   -H "Content-Type: application/json" \
-  -d @packages/laravel-logger/resources/opensearch/index-templates/cron_log-template.json
+  -d @packages/laravel-logger/resources/opensearch/index-templates/job_log-template.json
 
 curl -X PUT "http://localhost:9200/_index_template/integration_log-template" \
   -H "Content-Type: application/json" \
@@ -433,7 +430,8 @@ Log::general(new GeneralLogObject(
 
 - `Log::general(GeneralLogObject)` - General application events
 - `Log::api(ApiLogObject)` - API requests/responses (auto-logged via middleware)
-- `Log::cron(CronLogObject)` - Scheduled tasks and cron jobs
+- `Log::job(JobLogObject)` - Jobs and scheduled tasks (auto-logged when enabled, or set `frequency` for cron jobs)
+- `Log::cron(JobLogObject)` - Deprecated: use `Log::job()` instead (kept for backward compatibility)
 - `Log::integration(IntegrationLogObject)` - External API integrations
 - `Log::orm(OrmLogObject)` - Database/ORM operations (if enabled)
 - `Log::error(ErrorLogObject)` - Errors and exceptions (auto-logged)
@@ -476,6 +474,36 @@ LOG_ORM_MODEL_EVENTS_ENABLED=true
 ORM operations are automatically logged when enabled.
 
 > 📖 **Learn more:** See [Usage Examples - ORM Logging](USAGE.md#orm-logging) for details on ORM logging configuration and what gets logged.
+
+### Example: Job Logging
+
+Job execution events are **automatically logged** when enabled (default: enabled). The `LogJobEvents` listener tracks:
+- Job name and ID
+- Duration and memory usage
+- Status (success/failed)
+- Attempts and queue name
+- Whether it's a cron job (scheduled command)
+- Error messages for failed jobs
+
+Enable/disable in `.env`:
+```env
+LOG_JOB_ENABLED=true  # Default: true
+```
+
+You can also manually log job events using `Log::job()`:
+```php
+use Ermetix\LaravelLogger\Facades\LaravelLogger as Log;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
+
+Log::job(new JobLogObject(
+    message: 'custom_job_event',
+    job: 'MyCustomJob',
+    status: 'success',
+    durationMs: 1500,
+    frequency: null,
+    output: 'Custom output message',
+));
+```
 
 ### Example: Error Logging
 

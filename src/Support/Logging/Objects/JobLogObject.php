@@ -2,7 +2,7 @@
 
 namespace Ermetix\LaravelLogger\Support\Logging\Objects;
 
-class CronLogObject extends BaseLogObject
+class JobLogObject extends BaseLogObject
 {
     public function __construct(
         string $message,
@@ -16,6 +16,8 @@ class CronLogObject extends BaseLogObject
         public readonly ?int $durationMs = null,
         public readonly ?int $exitCode = null,
         public readonly ?float $memoryPeakMb = null,
+        public readonly ?string $frequency = null,
+        public readonly ?string $output = null,
         string $level = 'info',
         // Common fields
         ?string $parentRequestId = null,
@@ -53,12 +55,12 @@ class CronLogObject extends BaseLogObject
 
     public function index(): string
     {
-        return 'cron_log';
+        return 'job_log';
     }
 
     public function toArray(): array
     {
-        // cron_log doesn't need source location fields (file/line/class/function)
+        // job_log doesn't need source location fields (file/line/class/function)
         // as they would always point to the point where Log::cron() is called,
         // not the actual job class (which is already in the 'job' field)
         return array_merge(
@@ -74,6 +76,8 @@ class CronLogObject extends BaseLogObject
                 'duration_ms' => $this->durationMs,
                 'exit_code' => $this->exitCode,
                 'memory_peak_mb' => $this->memoryPeakMb,
+                'frequency' => $this->frequency,
+                'output' => $this->output,
             ], fn ($value) => $value !== null)
         );
     }

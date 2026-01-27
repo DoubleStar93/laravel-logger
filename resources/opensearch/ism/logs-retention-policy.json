@@ -30,7 +30,7 @@
       "index_patterns": [
         "api_log*",
         "general_log*",
-        "cron_log*",
+        "job_log*",
         "integration_log*",
         "orm_log*",
         "error_log*"

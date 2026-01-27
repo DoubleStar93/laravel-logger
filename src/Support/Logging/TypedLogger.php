@@ -3,7 +3,7 @@
 namespace Ermetix\LaravelLogger\Support\Logging;
 
 use Ermetix\LaravelLogger\Support\Logging\Objects\ApiLogObject;
-use Ermetix\LaravelLogger\Support\Logging\Objects\CronLogObject;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\GeneralLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\IntegrationLogObject;
@@ -47,14 +47,28 @@ class TypedLogger
     }
 
     /**
-     * Log a cron job or scheduled task event.
+     * Log a job or scheduled task event.
      * 
-     * @param CronLogObject $object Required. The cron log object to log.
+     * @param JobLogObject $object Required. The job log object to log.
      * @param bool $defer If true, logs are accumulated in memory and written at the end of the request/job.
      *                    If false, logs are written immediately (sync).
      * @return void
      */
-    public function cron(CronLogObject $object, bool $defer = true): void
+    public function job(JobLogObject $object, bool $defer = true): void
+    {
+        $this->multi->log($object, $defer);
+    }
+
+    /**
+     * Log a cron job or scheduled task event.
+     * 
+     * @param JobLogObject $object Required. The job log object to log.
+     * @param bool $defer If true, logs are accumulated in memory and written at the end of the request/job.
+     *                    If false, logs are written immediately (sync).
+     * @return void
+     * @deprecated Use job() instead. This method is kept for backward compatibility.
+     */
+    public function cron(JobLogObject $object, bool $defer = true): void
     {
         $this->multi->log($object, $defer);
     }

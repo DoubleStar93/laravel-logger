@@ -1,5 +1,5 @@
 {
-  "index_patterns": ["cron_log*"],
+  "index_patterns": ["job_log*"],
   "template": {
     "settings": {
       "number_of_shards": 1,
@@ -74,13 +74,20 @@
         },
         "memory_peak_mb": {
           "type": "float"
+        },
+        "frequency": {
+          "type": "keyword"
+        },
+        "output": {
+          "type": "text",
+          "index": true
         }
       }
     }
   },
   "priority": 200,
-  "version": 6,
+  "version": 8,
   "_meta": {
-    "description": "Template for cron_log index with strict mapping - fields at root level"
+    "description": "Template for job_log index with strict mapping - fields at root level"
   }
 }

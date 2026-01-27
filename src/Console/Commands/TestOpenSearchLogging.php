@@ -4,7 +4,7 @@ namespace Ermetix\LaravelLogger\Console\Commands;
 
 use Ermetix\LaravelLogger\Facades\LaravelLogger as Log;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ApiLogObject;
-use Ermetix\LaravelLogger\Support\Logging\Objects\CronLogObject;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\GeneralLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\IntegrationLogObject;
@@ -79,10 +79,10 @@ class TestOpenSearchLogging extends Command
             $this->line('   Stack trace: '.$e->getTraceAsString());
         }
 
-        // Test cron_log
-        $this->info('3. Testing cron_log...');
+        // Test job_log
+        $this->info('3. Testing job_log...');
         try {
-            Log::cron(new CronLogObject(
+            Log::job(new JobLogObject(
                 message: 'daily_report_completed',
                 job: 'reports:daily',
                 command: 'php artisan reports:daily',
@@ -90,9 +90,11 @@ class TestOpenSearchLogging extends Command
                 durationMs: 1530,
                 exitCode: 0,
                 memoryPeakMb: 128.5,
+                frequency: 'daily',
+                output: 'Report generated successfully',
                 level: 'info',
             ));
-            $this->line('   ✅ cron_log entry created');
+            $this->line('   ✅ job_log entry created');
         } catch (\Throwable $e) {
             $this->error('   ❌ Error: '.$e->getMessage());
             $this->line('   Stack trace: '.$e->getTraceAsString());

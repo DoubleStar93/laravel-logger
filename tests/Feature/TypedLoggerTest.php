@@ -3,7 +3,7 @@
 use Ermetix\LaravelLogger\Facades\LaravelLogger;
 use Ermetix\LaravelLogger\Support\Logging\Objects\GeneralLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ApiLogObject;
-use Ermetix\LaravelLogger\Support\Logging\Objects\CronLogObject;
+use Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\IntegrationLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\OrmLogObject;
 use Ermetix\LaravelLogger\Support\Logging\Objects\ErrorLogObject;
@@ -46,7 +46,7 @@ test('typed logger api method accepts ApiLogObject', function () {
     LaravelLogger::api($logObject, defer: false);
 });
 
-test('typed logger cron method accepts CronLogObject', function () {
+test('typed logger job method accepts JobLogObject', function () {
     Log::shouldReceive('channel')
         ->once()
         ->andReturnSelf();
@@ -54,12 +54,36 @@ test('typed logger cron method accepts CronLogObject', function () {
     Log::shouldReceive('log')
         ->once();
     
-    $logObject = new CronLogObject(
+    $logObject = new JobLogObject(
         message: 'job_completed',
         job: 'test:job',
         command: 'php artisan test:job',
         status: 'ok',
         durationMs: 1000,
+        frequency: 'daily',
+        output: 'Job completed',
+        level: 'info',
+    );
+    
+    LaravelLogger::job($logObject, defer: false);
+});
+
+test('typed logger cron method accepts JobLogObject (backward compatibility)', function () {
+    Log::shouldReceive('channel')
+        ->once()
+        ->andReturnSelf();
+    
+    Log::shouldReceive('log')
+        ->once();
+    
+    $logObject = new JobLogObject(
+        message: 'job_completed',
+        job: 'test:job',
+        command: 'php artisan test:job',
+        status: 'ok',
+        durationMs: 1000,
+        frequency: 'daily',
+        output: 'Job completed',
         level: 'info',
     );
     

@@ -83,3 +83,80 @@ test('service provider handles LogDatabaseQuery listener errors gracefully', fun
     \Illuminate\Support\Facades\Event::dispatch($event);
 });
 
+test('service provider binds LogJobEvents via container factory', function () {
+    $listener = app(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+    expect($listener)->toBeInstanceOf(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+});
+
+test('service provider handles LogJobEvents JobProcessing errors gracefully', function () {
+    config(['laravel-logger.job.enabled' => true]);
+    
+    // Create a mock listener that throws an exception
+    $mockListener = \Mockery::mock(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+    $mockListener->shouldReceive('handleJobProcessing')->andThrow(new \RuntimeException('Test error'));
+    app()->instance(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class, $mockListener);
+    
+    // Re-register the service provider to set up the listener
+    $provider = new LaravelLoggerServiceProvider(app());
+    $provider->boot();
+    
+    // Trigger a JobProcessing event
+    $job = \Mockery::mock(\Illuminate\Contracts\Queue\Job::class);
+    // PropagateRequestIdToJob also listens to JobProcessing and calls payload()
+    $job->shouldReceive('payload')->andReturn([])->byDefault();
+    $event = new \Illuminate\Queue\Events\JobProcessing('sync', $job);
+    
+    // Dispatch the event - the catch block should handle the error silently
+    \Illuminate\Support\Facades\Event::dispatch($event);
+    
+    // Test passes if no exception is thrown
+    expect(true)->toBeTrue();
+});
+
+test('service provider handles LogJobEvents JobProcessed errors gracefully', function () {
+    config(['laravel-logger.job.enabled' => true]);
+    
+    // Create a mock listener that throws an exception
+    $mockListener = \Mockery::mock(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+    $mockListener->shouldReceive('handleJobProcessed')->andThrow(new \RuntimeException('Test error'));
+    app()->instance(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class, $mockListener);
+    
+    // Re-register the service provider to set up the listener
+    $provider = new LaravelLoggerServiceProvider(app());
+    $provider->boot();
+    
+    // Trigger a JobProcessed event
+    $job = \Mockery::mock(\Illuminate\Contracts\Queue\Job::class);
+    $event = new \Illuminate\Queue\Events\JobProcessed('sync', $job);
+    
+    // Dispatch the event - the catch block should handle the error silently
+    \Illuminate\Support\Facades\Event::dispatch($event);
+    
+    // Test passes if no exception is thrown
+    expect(true)->toBeTrue();
+});
+
+test('service provider handles LogJobEvents JobFailed errors gracefully', function () {
+    config(['laravel-logger.job.enabled' => true]);
+    
+    // Create a mock listener that throws an exception
+    $mockListener = \Mockery::mock(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class);
+    $mockListener->shouldReceive('handleJobFailed')->andThrow(new \RuntimeException('Test error'));
+    app()->instance(\Ermetix\LaravelLogger\Listeners\LogJobEvents::class, $mockListener);
+    
+    // Re-register the service provider to set up the listener
+    $provider = new LaravelLoggerServiceProvider(app());
+    $provider->boot();
+    
+    // Trigger a JobFailed event
+    $job = \Mockery::mock(\Illuminate\Contracts\Queue\Job::class);
+    $exception = new \RuntimeException('Job failed');
+    $event = new \Illuminate\Queue\Events\JobFailed('sync', $job, $exception);
+    
+    // Dispatch the event - the catch block should handle the error silently
+    \Illuminate\Support\Facades\Event::dispatch($event);
+    
+    // Test passes if no exception is thrown
+    expect(true)->toBeTrue();
+});
+

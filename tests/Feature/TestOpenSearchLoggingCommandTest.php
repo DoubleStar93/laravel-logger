@@ -13,7 +13,7 @@ test('opensearch:test runs without sleeping and handles errors per log type', fu
     // Force each typed log call to throw so every catch block is executed.
     LaravelLogger::shouldReceive('api')->once()->andThrow(new RuntimeException('api'));
     LaravelLogger::shouldReceive('general')->once()->andThrow(new RuntimeException('general'));
-    LaravelLogger::shouldReceive('cron')->once()->andThrow(new RuntimeException('cron'));
+    LaravelLogger::shouldReceive('job')->once()->andThrow(new RuntimeException('job'));
     LaravelLogger::shouldReceive('integration')->once()->andThrow(new RuntimeException('integration'));
     LaravelLogger::shouldReceive('orm')->once()->andThrow(new RuntimeException('orm'));
     LaravelLogger::shouldReceive('error')->once()->andThrow(new RuntimeException('error'));
@@ -32,7 +32,7 @@ test('opensearch:test covers success paths for all log types', function () {
 
     LaravelLogger::shouldReceive('api')->once();
     LaravelLogger::shouldReceive('general')->once();
-    LaravelLogger::shouldReceive('cron')->once();
+    LaravelLogger::shouldReceive('job')->once();
     LaravelLogger::shouldReceive('integration')->once();
     LaravelLogger::shouldReceive('orm')->once();
     LaravelLogger::shouldReceive('error')->once();
