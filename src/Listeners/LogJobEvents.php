@@ -26,12 +26,31 @@ class LogJobEvents
     private array $jobStartTimes = [];
 
     /**
-     * Handle job processing event to track start time.
+     * Track captured output for each job.
+     * 
+     * @var array<string, string>
+     */
+    private array $jobOutputs = [];
+
+    /**
+     * Track output buffer levels for each job.
+     * 
+     * @var array<string, int>
+     */
+    private array $jobOutputBufferLevels = [];
+
+    /**
+     * Handle job processing event to track start time and start output capture.
      */
     public function handleJobProcessing(JobProcessing $event): void
     {
         $jobId = $this->getJobId($event->job);
         $this->jobStartTimes[$jobId] = microtime(true);
+        
+        // Start output buffering to capture any output from the job
+        // Store the current buffer level so we can restore it later
+        $this->jobOutputBufferLevels[$jobId] = ob_get_level();
+        ob_start();
     }
 
     /**
@@ -39,6 +58,11 @@ class LogJobEvents
      */
     public function handleJobProcessed(JobProcessed $event): void
     {
+        $jobId = $this->getJobId($event->job);
+        
+        // Capture output from output buffering
+        $this->captureJobOutput($jobId);
+        
         $this->logJob($event->job, 'success', null);
     }
 
@@ -47,10 +71,36 @@ class LogJobEvents
      */
     public function handleJobFailed(JobFailed $event): void
     {
+        $jobId = $this->getJobId($event->job);
+        
+        // Capture output from output buffering (even if job failed)
+        $this->captureJobOutput($jobId);
+        
         $exception = $event->exception;
         $errorMessage = $exception ? $exception->getMessage() : 'Job failed';
         
         $this->logJob($event->job, 'failed', $errorMessage, $exception?->getCode() ?? 1);
+    }
+
+    /**
+     * Capture output from output buffering for a job.
+     */
+    private function captureJobOutput(string $jobId): void
+    {
+        // Get the buffer level we started with
+        $startLevel = $this->jobOutputBufferLevels[$jobId] ?? 0;
+        $currentLevel = ob_get_level();
+        
+        // Only capture if we have a buffer we started
+        if ($currentLevel > $startLevel) {
+            $output = ob_get_clean();
+            if ($output !== false && $output !== '') {
+                $this->jobOutputs[$jobId] = $output;
+            }
+        }
+        
+        // Clean up
+        unset($this->jobOutputBufferLevels[$jobId]);
     }
 
     /**
@@ -68,6 +118,10 @@ class LogJobEvents
 
         // Clean up start time
         unset($this->jobStartTimes[$jobId]);
+        
+        // Get captured output (already captured in handleJobProcessed/handleJobFailed)
+        $capturedOutput = $this->jobOutputs[$jobId] ?? null;
+        unset($this->jobOutputs[$jobId]);
 
         // Get job name
         $jobName = $this->getJobName($job);
@@ -102,8 +156,25 @@ class LogJobEvents
         // Get memory peak
         $memoryPeakMb = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
 
-        // Build output message
-        $output = $errorMessage ?? ($status === 'success' ? 'Job completed successfully' : null);
+        // Build output message - try multiple sources in order:
+        // 1. Error message (if failed)
+        // 2. Captured output from output buffering (automatic)
+        // 3. Default success/failure message
+        $output = $errorMessage;
+        
+        if ($output === null) {
+            // First, try captured output from output buffering (automatic)
+            if (isset($capturedOutput) && $capturedOutput !== '') {
+                $output = $capturedOutput;
+            } else {
+                // Fallback to default message
+                if ($status === 'success') {
+                    $output = 'Job completed successfully';
+                } else {
+                    $output = 'Job failed';
+                }
+            }
+        }
 
         // Get request_id from context
         $requestId = Context::get('request_id');
@@ -280,4 +351,5 @@ class LogJobEvents
         
         return null;
     }
+
 }

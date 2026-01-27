@@ -219,7 +219,91 @@ test('LogJobEvents handles job failed without exception', function () {
     $property->setValue($event, null);
 
     $listener->handleJobProcessing(new JobProcessing('sync', $job));
+    // No output captured, should use "Job failed" (line 174)
     $listener->handleJobFailed($event);
+});
+
+test('LogJobEvents captures and uses output from output buffering', function () {
+    \Ermetix\LaravelLogger\Facades\LaravelLogger::shouldReceive('job')
+        ->once()
+        ->with(\Mockery::type(\Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject::class), false)
+        ->andReturnUsing(function ($object) {
+            expect($object->output())->toBe('Job output captured');
+        });
+
+    $listener = new \Ermetix\LaravelLogger\Listeners\LogJobEvents();
+
+    $job = \Mockery::mock(\Illuminate\Contracts\Queue\Job::class);
+    $job->shouldReceive('getJobId')->andReturn('123');
+    $job->shouldReceive('getQueue')->andReturn('default');
+    $job->shouldReceive('attempts')->andReturn(1);
+    $job->shouldReceive('payload')->andReturn(['displayName' => 'App\Jobs\TestJob']);
+    $job->shouldReceive('maxTries')->andReturn(null)->byDefault();
+    $job->shouldReceive('uuid')->andReturn(null)->byDefault();
+
+    // Start job processing (starts output buffering)
+    $listener->handleJobProcessing(new JobProcessing('sync', $job));
+    
+    // Simulate job output (this would normally come from the job execution)
+    echo 'Job output captured';
+    
+    // Process job completion (captures output and logs)
+    $listener->handleJobProcessed(new JobProcessed('sync', $job));
+});
+
+test('LogJobEvents uses default message when no output is captured for success', function () {
+    \Ermetix\LaravelLogger\Facades\LaravelLogger::shouldReceive('job')
+        ->once()
+        ->with(\Mockery::type(\Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject::class), false)
+        ->andReturnUsing(function ($object) {
+            expect($object->output())->toBe('Job completed successfully');
+        });
+
+    $listener = new \Ermetix\LaravelLogger\Listeners\LogJobEvents();
+
+    $job = \Mockery::mock(\Illuminate\Contracts\Queue\Job::class);
+    $job->shouldReceive('getJobId')->andReturn('123');
+    $job->shouldReceive('getQueue')->andReturn('default');
+    $job->shouldReceive('attempts')->andReturn(1);
+    $job->shouldReceive('payload')->andReturn(['displayName' => 'App\Jobs\TestJob']);
+    $job->shouldReceive('maxTries')->andReturn(null)->byDefault();
+    $job->shouldReceive('uuid')->andReturn(null)->byDefault();
+
+    $listener->handleJobProcessing(new JobProcessing('sync', $job));
+    // No output produced
+    $listener->handleJobProcessed(new JobProcessed('sync', $job));
+});
+
+test('LogJobEvents uses default "Job failed" message when failed without exception and no output', function () {
+    \Ermetix\LaravelLogger\Facades\LaravelLogger::shouldReceive('job')
+        ->once()
+        ->with(\Mockery::type(\Ermetix\LaravelLogger\Support\Logging\Objects\JobLogObject::class), false)
+        ->andReturnUsing(function ($object) {
+            expect($object->status())->toBe('failed');
+            expect($object->output())->toBe('Job failed'); // Linea 174
+            expect($object->exitCode())->toBe(1);
+        });
+
+    $listener = new \Ermetix\LaravelLogger\Listeners\LogJobEvents();
+
+    $job = \Mockery::mock(\Illuminate\Contracts\Queue\Job::class);
+    $job->shouldReceive('getJobId')->andReturn('123');
+    $job->shouldReceive('getQueue')->andReturn('default');
+    $job->shouldReceive('attempts')->andReturn(1);
+    $job->shouldReceive('payload')->andReturn(['displayName' => 'App\Jobs\TestJob']);
+    $job->shouldReceive('maxTries')->andReturn(null)->byDefault();
+    $job->shouldReceive('uuid')->andReturn(null)->byDefault();
+
+    // Use reflection to call logJob directly with errorMessage=null
+    // This tests the else branch at line 174 where status='failed' and no output
+    $reflection = new \ReflectionClass($listener);
+    $method = $reflection->getMethod('logJob');
+    $method->setAccessible(true);
+    
+    $listener->handleJobProcessing(new JobProcessing('sync', $job));
+    // Call logJob directly with status='failed', errorMessage=null, and no captured output
+    // This will trigger the else branch at line 174
+    $method->invoke($listener, $job, 'failed', null, 1);
 });
 
 test('LogJobEvents handles job with payload job key', function () {
