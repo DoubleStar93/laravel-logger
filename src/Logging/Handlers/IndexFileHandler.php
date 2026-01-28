@@ -48,7 +48,7 @@ class IndexFileHandler extends AbstractProcessingHandler implements BatchableHan
 
             // Ensure a stable timestamp + index inside the record.
             $payload = [
-                '@timestamp' => $record->datetime->format(DATE_ATOM),
+                '@timestamp' => $record->datetime->format('Y-m-d\TH:i:s.uP'),
                 'log_index' => $index,
                 ...$doc,
             ];
@@ -226,7 +226,7 @@ class IndexFileHandler extends AbstractProcessingHandler implements BatchableHan
             unset($doc['log_index']);
 
             $payload = [
-                '@timestamp' => $record->datetime->format(DATE_ATOM),
+                '@timestamp' => $record->datetime->format('Y-m-d\TH:i:s.uP'),
                 'log_index' => $index,
                 ...$doc,
             ];

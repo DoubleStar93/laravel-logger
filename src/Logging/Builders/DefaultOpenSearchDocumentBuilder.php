@@ -28,7 +28,7 @@ class DefaultOpenSearchDocumentBuilder implements OpenSearchDocumentBuilder
         // message field removed - it's redundant as we have structured fields for each log type
         // We keep it in Monolog record for compatibility but don't store it in OpenSearch
         $doc = [
-            '@timestamp' => $record->datetime->format(DATE_ATOM),
+            '@timestamp' => $record->datetime->format('Y-m-d\TH:i:s.uP'),
             'level' => strtolower($record->level->getName()),
             // Convenience shortcut for correlation. request_id is also available in extra.request_id.
             'request_id' => $record->extra['request_id'] ?? ($record->context['request_id'] ?? null),

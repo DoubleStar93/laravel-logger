@@ -19,7 +19,7 @@ test('DefaultKafkaValueBuilder includes monolog metadata', function () {
     $value = $builder($record);
 
     expect($value)->toMatchArray([
-        'timestamp' => '2026-01-22T10:11:12+00:00',
+        'timestamp' => '2026-01-22T10:11:12.000000+00:00',
         'level' => 'WARNING',
         'channel' => 'test',
         'message' => 'hello',

@@ -12,7 +12,7 @@ test('LogToOpenSearch job builds LogRecord and delegates to OpenSearchIndexHandl
             expect($record)->toBeInstanceOf(LogRecord::class);
             expect($record->context['message'])->toBe('hello');
             expect($record->context['level'])->toBe('error');
-            expect($record->context['@timestamp'])->toBe('2026-01-22T10:11:12+00:00');
+            expect($record->context['@timestamp'])->toBe('2026-01-22T10:11:12.000000+00:00');
             return true;
         }));
 
@@ -23,7 +23,7 @@ test('LogToOpenSearch job builds LogRecord and delegates to OpenSearchIndexHandl
     $job = new LogToOpenSearch(
         index: 'error_log',
         document: [
-            '@timestamp' => '2026-01-22T10:11:12+00:00',
+            '@timestamp' => '2026-01-22T10:11:12.000000+00:00',
             'level' => 'error',
             'message' => 'hello',
         ],

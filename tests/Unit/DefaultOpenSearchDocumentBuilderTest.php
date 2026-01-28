@@ -60,7 +60,7 @@ test('DefaultOpenSearchDocumentBuilder builds document, excludes log_index, and 
 
     $doc = $builder->document($record);
 
-    expect($doc)->toHaveKey('@timestamp', '2026-01-22T10:11:12+00:00');
+    expect($doc)->toHaveKey('@timestamp', '2026-01-22T10:11:12.000000+00:00');
     expect($doc)->toHaveKey('level', 'warning');
     // message field is NOT included in the document by DefaultOpenSearchDocumentBuilder
     // It's only included by LogObject::toArray() for general_log

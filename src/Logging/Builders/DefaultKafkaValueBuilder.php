@@ -10,7 +10,7 @@ class DefaultKafkaValueBuilder implements KafkaValueBuilder
     public function __invoke(LogRecord $record): array
     {
         return [
-            'timestamp' => $record->datetime->format(DATE_ATOM),
+            'timestamp' => $record->datetime->format('Y-m-d\TH:i:s.uP'),
             'level' => $record->level->getName(),
             'channel' => $record->channel,
             'message' => $record->message,

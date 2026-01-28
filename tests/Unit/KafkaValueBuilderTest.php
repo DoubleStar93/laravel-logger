@@ -36,7 +36,7 @@ test('IndexKeyKafkaValueBuilder returns {index: document} and uses context only'
 
     // timestamp injected
     expect($doc)->toHaveKey('@timestamp');
-    expect($doc['@timestamp'])->toBe('2026-01-22T10:11:12+00:00');
+    expect($doc['@timestamp'])->toBe('2026-01-22T10:11:12.000000+00:00');
 
     // object fields preserved
     expect($doc['message'])->toBe('api_request');

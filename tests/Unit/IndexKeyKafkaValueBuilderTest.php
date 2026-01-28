@@ -25,7 +25,7 @@ test('IndexKeyKafkaValueBuilder builds value with index key', function () {
 
     expect($value)->toBeArray();
     expect($value)->toHaveKey('api_log');
-    expect($value['api_log'])->toHaveKey('@timestamp', '2026-01-22T10:11:12+00:00');
+    expect($value['api_log'])->toHaveKey('@timestamp', '2026-01-22T10:11:12.000000+00:00');
     expect($value['api_log'])->toHaveKey('method', 'GET');
     expect($value['api_log'])->toHaveKey('path', '/api/test');
     expect($value['api_log'])->toHaveKey('status', 200);

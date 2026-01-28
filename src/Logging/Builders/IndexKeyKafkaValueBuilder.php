@@ -25,7 +25,7 @@ class IndexKeyKafkaValueBuilder implements KafkaValueBuilder
         unset($doc['log_index']);
 
         // Keep a stable timestamp field for downstream ingestion.
-        $doc['@timestamp'] = $record->datetime->format(DATE_ATOM);
+        $doc['@timestamp'] = $record->datetime->format('Y-m-d\TH:i:s.uP');
 
         return [
             $index => $doc,

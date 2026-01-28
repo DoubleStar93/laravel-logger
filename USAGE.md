@@ -145,7 +145,7 @@ class CustomOpenSearchDocumentBuilder implements OpenSearchDocumentBuilder
     {
         // Custom document structure
         return [
-            '@timestamp' => $record->datetime->format(DATE_ATOM),
+            '@timestamp' => $record->datetime->format('Y-m-d\TH:i:s.uP'),
             'custom_field' => 'custom_value',
         ];
     }

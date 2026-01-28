@@ -429,7 +429,7 @@ test('OpenSearchIndexHandler writeBatch uses fallback when builder returns non-s
     $mockBuilder->shouldReceive('index')
         ->andReturn('');
     $mockBuilder->shouldReceive('document')
-        ->andReturn(['@timestamp' => '2026-01-22T10:00:00+00:00', 'message' => 'Test']);
+        ->andReturn(['@timestamp' => '2026-01-22T10:00:00.000000+00:00', 'message' => 'Test']);
     
     $mockHttp->shouldReceive('post')
         ->once()
