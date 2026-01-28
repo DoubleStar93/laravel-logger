@@ -32,19 +32,27 @@ class DefaultOpenSearchDocumentBuilder implements OpenSearchDocumentBuilder
             'level' => strtolower($record->level->getName()),
             // Convenience shortcut for correlation. request_id is also available in extra.request_id.
             'request_id' => $record->extra['request_id'] ?? ($record->context['request_id'] ?? null),
+            // trace_id for distributed tracing - always present and linked to request_id
+            'trace_id' => $record->extra['trace_id'] ?? ($record->context['trace_id'] ?? null),
         ];
 
         // Add all context fields directly to the document (except log_index which is only for routing)
         foreach ($record->context as $key => $value) {
-            // Do not overwrite fields we already set (e.g. request_id from extra)
+            // Do not overwrite fields we already set (e.g. request_id, trace_id from extra)
             if ($key !== 'log_index' && !array_key_exists($key, $doc)) {
                 $doc[$key] = $value;
             }
         }
 
-        // Add extra fields if needed (currently only request_id is used)
-        if (isset($record->extra['request_id'])) {
-            // Already added above
+        // Ensure request_id and trace_id are always present
+        // If not in context/extra, generate them to ensure they're never empty
+        if (empty($doc['request_id'])) {
+            $doc['request_id'] = (string) \Illuminate\Support\Str::uuid();
+        }
+        
+        if (empty($doc['trace_id'])) {
+            // Use request_id as trace_id to keep them linked
+            $doc['trace_id'] = $doc['request_id'];
         }
 
         // Auto-populate common fields if not already present

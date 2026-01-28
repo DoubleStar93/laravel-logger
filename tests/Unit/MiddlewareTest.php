@@ -36,6 +36,45 @@ test('RequestId middleware generates request id when missing', function () {
     $rid = (string) $res->headers->get('X-Request-Id');
     expect($rid)->not->toBe('');
     expect(Context::get('request_id'))->toBe($rid);
+    
+    // trace_id should be generated and linked to request_id
+    $traceId = (string) $res->headers->get('X-Trace-Id');
+    expect($traceId)->not->toBe('');
+    expect(Context::get('trace_id'))->toBe($traceId);
+    expect($traceId)->toBe($rid); // Should be same as request_id when not provided
+});
+
+test('RequestId middleware uses existing trace id header', function () {
+    Context::flush();
+
+    $mw = new RequestId();
+    $req = Request::create('/api/ping', 'GET');
+    $req->headers->set('X-Request-Id', 'rid-123');
+    $req->headers->set('X-Trace-Id', 'trace-456');
+
+    $res = $mw->handle($req, fn () => new Response('ok', 200));
+
+    expect(Context::get('request_id'))->toBe('rid-123');
+    expect(Context::get('trace_id'))->toBe('trace-456');
+    expect($req->attributes->get('request_id'))->toBe('rid-123');
+    expect($req->attributes->get('trace_id'))->toBe('trace-456');
+    expect($res->headers->get('X-Request-Id'))->toBe('rid-123');
+    expect($res->headers->get('X-Trace-Id'))->toBe('trace-456');
+});
+
+test('RequestId middleware generates trace_id from request_id when trace_id header is missing', function () {
+    Context::flush();
+
+    $mw = new RequestId();
+    $req = Request::create('/api/ping', 'GET');
+    $req->headers->set('X-Request-Id', 'rid-123');
+    // No X-Trace-Id header
+
+    $res = $mw->handle($req, fn () => new Response('ok', 200));
+
+    expect(Context::get('request_id'))->toBe('rid-123');
+    expect(Context::get('trace_id'))->toBe('rid-123'); // Should use request_id as trace_id
+    expect($res->headers->get('X-Trace-Id'))->toBe('rid-123');
 });
 
 test('FlushDeferredLogs flushes and rethrows on exception', function () {

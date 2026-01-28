@@ -54,6 +54,9 @@ class LaravelLoggerServiceProvider extends ServiceProvider
         $this->app->bind(\Ermetix\LaravelLogger\Listeners\LogModelEvents::class, function () {
             return new \Ermetix\LaravelLogger\Listeners\LogModelEvents();
         });
+        $this->app->bind(\Ermetix\LaravelLogger\Listeners\LogOrmOperation::class, function () {
+            return new \Ermetix\LaravelLogger\Listeners\LogOrmOperation();
+        });
         $this->app->bind(\Ermetix\LaravelLogger\Listeners\PropagateRequestIdToJob::class, function () {
             return new \Ermetix\LaravelLogger\Listeners\PropagateRequestIdToJob();
         });
@@ -72,6 +75,12 @@ class LaravelLoggerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Initialize request_id and trace_id for CLI commands if not already set
+        // This ensures they're always present even when middleware is not executed
+        if ($this->app->runningInConsole()) {
+            $this->initializeCorrelationIdsForCli();
+        }
+
         // Always flush deferred logs at the end of the lifecycle (HTTP request and CLI).
         // This is especially important because the default for $defer is true.
         $this->app->terminating(function (): void {
@@ -110,15 +119,18 @@ class LaravelLoggerServiceProvider extends ServiceProvider
             ]);
         }
 
-        // Automatically log database queries to orm_log
+        // Automatically log ORM operations (database queries + Eloquent model events) to orm_log
+        // This unified listener combines QueryExecuted and Eloquent events into a single log entry
         if (config('laravel-logger.orm.enabled', false)) {
             $app = $this->app;
+            
+            // Listen to QueryExecuted events
             \Illuminate\Support\Facades\Event::listen(
                 \Illuminate\Database\Events\QueryExecuted::class,
                 function (\Illuminate\Database\Events\QueryExecuted $event) use ($app) {
                     try {
-                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogDatabaseQuery::class);
-                        $listener->handle($event);
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogOrmOperation::class);
+                        $listener->handleQueryExecuted($event);
                     } catch (\Throwable $e) {
                         // Silently fail to avoid breaking the application
                         \Illuminate\Support\Facades\Log::error('Failed to log database query', [
@@ -128,31 +140,44 @@ class LaravelLoggerServiceProvider extends ServiceProvider
                     }
                 },
             );
-        }
 
-        // Automatically log Eloquent model events (creating, created, updating, updated, deleting, deleted)
-        if (config('laravel-logger.orm.model_events_enabled', false)) {
+            // Listen to Eloquent model events (created, updated, deleted)
             // In Laravel 12 the base Eloquent Model is abstract, so we can't call Model::observe(...)
             // (it would try to instantiate the abstract class). Instead we listen to wildcard
             // Eloquent events and forward them to our listener.
-            \Illuminate\Support\Facades\Event::listen('eloquent.created: *', function (string $_eventName, array $data): void {
+            \Illuminate\Support\Facades\Event::listen('eloquent.created: *', function (string $_eventName, array $data) use ($app): void {
                 $model = $data[0] ?? null;
                 if ($model instanceof \Illuminate\Database\Eloquent\Model) {
-                    app(\Ermetix\LaravelLogger\Listeners\LogModelEvents::class)->created($model);
+                    try {
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogOrmOperation::class);
+                        $listener->created($model);
+                    } catch (\Throwable $e) {
+                        // Silently fail to avoid breaking the application
+                    }
                 }
             });
 
-            \Illuminate\Support\Facades\Event::listen('eloquent.updated: *', function (string $_eventName, array $data): void {
+            \Illuminate\Support\Facades\Event::listen('eloquent.updated: *', function (string $_eventName, array $data) use ($app): void {
                 $model = $data[0] ?? null;
                 if ($model instanceof \Illuminate\Database\Eloquent\Model) {
-                    app(\Ermetix\LaravelLogger\Listeners\LogModelEvents::class)->updated($model);
+                    try {
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogOrmOperation::class);
+                        $listener->updated($model);
+                    } catch (\Throwable $e) {
+                        // Silently fail to avoid breaking the application
+                    }
                 }
             });
 
-            \Illuminate\Support\Facades\Event::listen('eloquent.deleted: *', function (string $_eventName, array $data): void {
+            \Illuminate\Support\Facades\Event::listen('eloquent.deleted: *', function (string $_eventName, array $data) use ($app): void {
                 $model = $data[0] ?? null;
                 if ($model instanceof \Illuminate\Database\Eloquent\Model) {
-                    app(\Ermetix\LaravelLogger\Listeners\LogModelEvents::class)->deleted($model);
+                    try {
+                        $listener = $app->make(\Ermetix\LaravelLogger\Listeners\LogOrmOperation::class);
+                        $listener->deleted($model);
+                    } catch (\Throwable $e) {
+                        // Silently fail to avoid breaking the application
+                    }
                 }
             });
         }
@@ -222,6 +247,32 @@ class LaravelLoggerServiceProvider extends ServiceProvider
     {
         // Middleware can be registered in bootstrap/app.php or via config
         // This is just a helper method if needed
+    }
+
+    /**
+     * Initialize request_id and trace_id for CLI commands if not already present.
+     * This ensures correlation IDs are always available even when middleware is not executed.
+     */
+    protected function initializeCorrelationIdsForCli(): void
+    {
+        if (!class_exists(\Illuminate\Support\Facades\Context::class)) {
+            return;
+        }
+
+        // Only initialize if not already set (e.g., by middleware or previous initialization)
+        $requestId = \Illuminate\Support\Facades\Context::get('request_id');
+        $traceId = \Illuminate\Support\Facades\Context::get('trace_id');
+
+        if (empty($requestId)) {
+            $requestId = (string) \Illuminate\Support\Str::uuid();
+            \Illuminate\Support\Facades\Context::add('request_id', $requestId);
+        }
+
+        if (empty($traceId)) {
+            // Use request_id as trace_id to keep them linked
+            $traceId = $requestId;
+            \Illuminate\Support\Facades\Context::add('trace_id', $traceId);
+        }
     }
 
     /**

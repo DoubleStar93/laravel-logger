@@ -68,13 +68,19 @@ return [
     | ORM/Database Query Logging
     |--------------------------------------------------------------------------
     |
-    | Automatically log all database queries to orm_log index.
+    | Automatically log all database queries and Eloquent model events to orm_log index.
+    | This unified logging combines QueryExecuted events with Eloquent model events
+    | (created, updated, deleted) into a single log entry per operation.
+    |
+    | When enabled, logs include:
+    | - Query SQL, bindings, duration, slow query detection (from QueryExecuted)
+    | - Previous value and after value (from Eloquent events)
+    |
     | WARNING: This can generate a lot of logs. Use with caution in production.
     |
     */
     'orm' => [
         'enabled' => filter_var(env('LOG_ORM_ENABLED', false), FILTER_VALIDATE_BOOL),
-        'model_events_enabled' => filter_var(env('LOG_ORM_MODEL_EVENTS_ENABLED', false), FILTER_VALIDATE_BOOL),
         'log_read_operations' => filter_var(env('LOG_ORM_LOG_READ_OPERATIONS', false), FILTER_VALIDATE_BOOL), // Log SELECT queries
         'slow_query_threshold_ms' => (int) env('LOG_ORM_SLOW_QUERY_THRESHOLD_MS', 1000),
         'ignore_patterns' => [

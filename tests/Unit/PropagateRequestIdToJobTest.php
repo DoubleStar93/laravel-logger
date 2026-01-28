@@ -54,3 +54,53 @@ test('PropagateRequestIdToJob generates new request_id even when parent request_
     expect($newRequestId)->toBeString();
     expect(Str::isUuid($newRequestId))->toBeTrue();
 });
+
+test('PropagateRequestIdToJob preserves trace_id from parent', function () {
+    $listener = new PropagateRequestIdToJob();
+    
+    // Set initial request_id and trace_id in context (from parent request)
+    Context::add('request_id', 'parent-request-123');
+    Context::add('trace_id', 'parent-trace-456');
+    
+    $job = new class {
+        public function getJobId() { return 'job-123'; }
+    };
+    $event = new JobProcessing('connection', $job);
+    
+    $listener->handle($event);
+    
+    // Should preserve trace_id from parent
+    expect(Context::get('trace_id'))->toBe('parent-trace-456');
+    
+    // Should have new request_id generated
+    $newRequestId = Context::get('request_id');
+    expect($newRequestId)->not->toBe('parent-request-123');
+    expect($newRequestId)->toBeString();
+    expect(Str::isUuid($newRequestId))->toBeTrue();
+});
+
+test('PropagateRequestIdToJob generates trace_id when parent trace_id is missing', function () {
+    $listener = new PropagateRequestIdToJob();
+    
+    // Set only request_id, no trace_id
+    Context::add('request_id', 'parent-request-123');
+    
+    $job = new class {
+        public function getJobId() { return 'job-123'; }
+    };
+    $event = new JobProcessing('connection', $job);
+    
+    $listener->handle($event);
+    
+    // Should have new request_id generated
+    $newRequestId = Context::get('request_id');
+    expect($newRequestId)->not->toBe('parent-request-123');
+    expect($newRequestId)->toBeString();
+    expect(Str::isUuid($newRequestId))->toBeTrue();
+    
+    // Should have trace_id generated (same as new request_id to keep them linked)
+    $traceId = Context::get('trace_id');
+    expect($traceId)->toBe($newRequestId);
+    expect($traceId)->toBeString();
+    expect(Str::isUuid($traceId))->toBeTrue();
+});

@@ -145,8 +145,10 @@ KAFKA_LOG_TIMEOUT=2
 KAFKA_LOG_SILENT=true
 
 # ORM Logging (optional)
+# When enabled, logs both database queries (QueryExecuted) and Eloquent model events
+# into unified orm_log entries. Each ORM operation generates a single log that combines
+# query SQL/bindings/duration with model previous_value/after_value.
 LOG_ORM_ENABLED=false
-LOG_ORM_MODEL_EVENTS_ENABLED=false
 LOG_ORM_SLOW_QUERY_THRESHOLD_MS=1000
 
 # Middleware Configuration
@@ -468,7 +470,6 @@ Enable ORM logging in `.env`:
 
 ```env
 LOG_ORM_ENABLED=true
-LOG_ORM_MODEL_EVENTS_ENABLED=true
 ```
 
 ORM operations are automatically logged when enabled.
