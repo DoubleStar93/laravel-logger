@@ -34,13 +34,14 @@ class PropagateRequestIdToJob
         $jobRequestId = (string) Str::uuid();
         Context::add('request_id', $jobRequestId);
 
-        // Preserve trace_id from parent to keep all logs linked
-        // If parent doesn't have trace_id, generate one based on the new request_id
+        // Preserve trace_id from parent to keep all logs linked in distributed trace
+        // trace_id should remain the same across jobs in the same trace
         if ($parentTraceId !== null) {
             Context::add('trace_id', $parentTraceId);
         } else {
-            // Generate trace_id if not present (use same as request_id to keep them linked)
-            Context::add('trace_id', $jobRequestId);
+            // Generate a new trace_id if not present (can be different from request_id)
+            $newTraceId = (string) Str::uuid();
+            Context::add('trace_id', $newTraceId);
         }
     }
 }

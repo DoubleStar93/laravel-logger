@@ -37,6 +37,9 @@ class ApiAccessLog
         // Detect API version from path (e.g., /api/v1/users -> v1)
         $apiVersion = $this->detectApiVersion($request);
 
+        // Get parent_request_id from context (set by RequestId middleware if X-Parent-Request-Id header was present)
+        $parentRequestId = Context::get('parent_request_id');
+
         // Use typed LogObject instead of generic context array
         // Defer logging to end of request to avoid blocking the response
         Log::api(
@@ -60,6 +63,7 @@ class ApiAccessLog
                 responseBody: $responseBody,
                 requestHeaders: $this->getRequestHeaders($request),
                 responseHeaders: $this->getResponseHeaders($response),
+                parentRequestId: $parentRequestId,
                 level: 'info',
             ),
             defer: true, // Accumulate in memory, write at end of request

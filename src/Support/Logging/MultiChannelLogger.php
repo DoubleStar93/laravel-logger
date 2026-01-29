@@ -52,15 +52,10 @@ class MultiChannelLogger
     {
         // Check if request_id is already in context (from LogObject or Context facade)
         if (empty($context['request_id'])) {
-            // Try to get from Laravel Context facade
-            if (function_exists('\\Illuminate\\Support\\Facades\\Context::get')) {
-                $requestId = \Illuminate\Support\Facades\Context::get('request_id');
-                if (!empty($requestId)) {
-                    $context['request_id'] = $requestId;
-                }
+            $requestId = $this->getRequestIdFromContext();
+            if (!empty($requestId)) {
+                $context['request_id'] = $requestId;
             }
-            
-            // If still empty, generate one
             if (empty($context['request_id'])) {
                 $context['request_id'] = (string) \Illuminate\Support\Str::uuid();
             }
@@ -68,19 +63,44 @@ class MultiChannelLogger
 
         // Check if trace_id is already in context (from LogObject or Context facade)
         if (empty($context['trace_id'])) {
-            // Try to get from Laravel Context facade
-            if (function_exists('\\Illuminate\\Support\\Facades\\Context::get')) {
-                $traceId = \Illuminate\Support\Facades\Context::get('trace_id');
-                if (!empty($traceId)) {
-                    $context['trace_id'] = $traceId;
-                }
+            $traceId = $this->getTraceIdFromContext();
+            if (!empty($traceId)) {
+                $context['trace_id'] = $traceId;
             }
-            
-            // If still empty, use request_id to keep them linked
             if (empty($context['trace_id'])) {
                 $context['trace_id'] = $context['request_id'];
             }
         }
+    }
+
+    /**
+     * Get request_id from Laravel Context facade. Override in tests to inject values.
+     */
+    protected function getRequestIdFromContext(): ?string
+    {
+        try {
+            if (function_exists('\\Illuminate\\Support\\Facades\\Context::get')) {
+                return \Illuminate\Support\Facades\Context::get('request_id');
+            }
+        } catch (\Throwable $e) {
+            // Context not available (e.g. older Laravel or non-Laravel) - fall through to return null
+        }
+        return null;
+    }
+
+    /**
+     * Get trace_id from Laravel Context facade. Override in tests to inject values.
+     */
+    protected function getTraceIdFromContext(): ?string
+    {
+        try {
+            if (function_exists('\\Illuminate\\Support\\Facades\\Context::get')) {
+                return \Illuminate\Support\Facades\Context::get('trace_id');
+            }
+        } catch (\Throwable $e) {
+            // Context not available (e.g. older Laravel or non-Laravel) - fall through to return null
+        }
+        return null;
     }
 
     /**

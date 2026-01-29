@@ -108,6 +108,9 @@ class LaravelLoggerServiceProvider extends ServiceProvider
         // Register middleware
         $this->registerMiddleware();
 
+        // Register Http macro for automatic trace_id propagation
+        $this->registerHttpMacro();
+
         // Register Artisan commands
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -250,6 +253,44 @@ class LaravelLoggerServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register Http macro for automatic trace_id and request_id propagation.
+     * 
+     * This allows developers to easily propagate correlation IDs when making
+     * external HTTP requests by using Http::withTraceContext().
+     */
+    protected function registerHttpMacro(): void
+    {
+        if (!class_exists(\Illuminate\Support\Facades\Http::class)) {
+            return;
+        }
+
+        \Illuminate\Support\Facades\Http::macro('withTraceContext', function () {
+            $headers = [];
+            
+            // Get trace_id from context - this should be propagated to keep distributed trace linked
+            if (class_exists(\Illuminate\Support\Facades\Context::class)) {
+                $traceId = \Illuminate\Support\Facades\Context::get('trace_id');
+                if (!empty($traceId)) {
+                    $headers['X-Trace-Id'] = $traceId;
+                }
+
+                // Include current request_id as parent_request_id in the called service
+                // This allows the called service to know which request_id called it
+                // The called service will generate its own new request_id
+                $requestId = \Illuminate\Support\Facades\Context::get('request_id');
+                if (!empty($requestId)) {
+                    $headers['X-Parent-Request-Id'] = $requestId;
+                }
+            }
+
+            // $this refers to PendingRequest instance when called as macro
+            /** @var \Illuminate\Http\Client\PendingRequest $pendingRequest */
+            $pendingRequest = $this;
+            return $pendingRequest->withHeaders($headers);
+        });
+    }
+
+    /**
      * Initialize request_id and trace_id for CLI commands if not already present.
      * This ensures correlation IDs are always available even when middleware is not executed.
      */
@@ -263,14 +304,16 @@ class LaravelLoggerServiceProvider extends ServiceProvider
         $requestId = \Illuminate\Support\Facades\Context::get('request_id');
         $traceId = \Illuminate\Support\Facades\Context::get('trace_id');
 
+        // Generate request_id if not present (unique per command execution)
         if (empty($requestId)) {
             $requestId = (string) \Illuminate\Support\Str::uuid();
             \Illuminate\Support\Facades\Context::add('request_id', $requestId);
         }
 
+        // Generate trace_id if not present (can be different from request_id)
+        // For CLI, we still generate a new trace_id, but it can be different from request_id
         if (empty($traceId)) {
-            // Use request_id as trace_id to keep them linked
-            $traceId = $requestId;
+            $traceId = (string) \Illuminate\Support\Str::uuid();
             \Illuminate\Support\Facades\Context::add('trace_id', $traceId);
         }
     }

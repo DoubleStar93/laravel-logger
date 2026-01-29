@@ -98,9 +98,9 @@ test('PropagateRequestIdToJob generates trace_id when parent trace_id is missing
     expect($newRequestId)->toBeString();
     expect(Str::isUuid($newRequestId))->toBeTrue();
     
-    // Should have trace_id generated (same as new request_id to keep them linked)
+    // Should have trace_id generated (can be different from request_id)
     $traceId = Context::get('trace_id');
-    expect($traceId)->toBe($newRequestId);
+    expect($traceId)->not->toBe($newRequestId); // trace_id and request_id can be different
     expect($traceId)->toBeString();
     expect(Str::isUuid($traceId))->toBeTrue();
 });

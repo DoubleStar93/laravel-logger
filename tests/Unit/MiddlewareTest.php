@@ -37,11 +37,11 @@ test('RequestId middleware generates request id when missing', function () {
     expect($rid)->not->toBe('');
     expect(Context::get('request_id'))->toBe($rid);
     
-    // trace_id should be generated and linked to request_id
+    // trace_id should be generated (can be different from request_id)
     $traceId = (string) $res->headers->get('X-Trace-Id');
     expect($traceId)->not->toBe('');
     expect(Context::get('trace_id'))->toBe($traceId);
-    expect($traceId)->toBe($rid); // Should be same as request_id when not provided
+    // trace_id and request_id can be different now
 });
 
 test('RequestId middleware uses existing trace id header', function () {
@@ -62,7 +62,7 @@ test('RequestId middleware uses existing trace id header', function () {
     expect($res->headers->get('X-Trace-Id'))->toBe('trace-456');
 });
 
-test('RequestId middleware generates trace_id from request_id when trace_id header is missing', function () {
+test('RequestId middleware generates new trace_id when trace_id header is missing', function () {
     Context::flush();
 
     $mw = new RequestId();
@@ -73,8 +73,29 @@ test('RequestId middleware generates trace_id from request_id when trace_id head
     $res = $mw->handle($req, fn () => new Response('ok', 200));
 
     expect(Context::get('request_id'))->toBe('rid-123');
-    expect(Context::get('trace_id'))->toBe('rid-123'); // Should use request_id as trace_id
-    expect($res->headers->get('X-Trace-Id'))->toBe('rid-123');
+    // trace_id should be generated (different from request_id)
+    $traceId = Context::get('trace_id');
+    expect($traceId)->not->toBe('rid-123');
+    expect($traceId)->not->toBe('');
+    expect($res->headers->get('X-Trace-Id'))->toBe($traceId);
+});
+
+test('RequestId middleware handles parent_request_id header', function () {
+    Context::flush();
+
+    $mw = new RequestId();
+    $req = Request::create('/api/ping', 'GET');
+    $req->headers->set('X-Trace-Id', 'trace-456');
+    $req->headers->set('X-Parent-Request-Id', 'parent-rid-789');
+
+    $res = $mw->handle($req, fn () => new Response('ok', 200));
+
+    expect(Context::get('trace_id'))->toBe('trace-456');
+    expect(Context::get('parent_request_id'))->toBe('parent-rid-789');
+    // request_id should be generated (new unique ID for this request)
+    $requestId = Context::get('request_id');
+    expect($requestId)->not->toBe('parent-rid-789');
+    expect($requestId)->not->toBe('');
 });
 
 test('FlushDeferredLogs flushes and rethrows on exception', function () {
@@ -402,5 +423,46 @@ test('ApiAccessLog returns null for response headers when empty', function () {
     // Response has default headers
 
     (new ApiAccessLog())->handle($req, fn () => $response);
+});
+
+test('ApiAccessLog includes parent_request_id when present in context', function () {
+    Context::flush();
+    Context::add('parent_request_id', 'parent-request-123');
+
+    Auth::shouldReceive('check')->andReturn(false);
+    Auth::shouldReceive('id')->andReturn(null);
+
+    LaravelLogger::shouldReceive('api')
+        ->once()
+        ->with(\Mockery::on(function ($obj) {
+            expect($obj)->toBeInstanceOf(ApiLogObject::class);
+            $arr = $obj->toArray();
+            expect($arr)->toHaveKey('parent_request_id', 'parent-request-123');
+            return true;
+        }), true);
+
+    $req = Request::create('/api/ping', 'GET');
+    (new ApiAccessLog())->handle($req, fn () => new Response('ok', 200));
+});
+
+test('ApiAccessLog excludes parent_request_id when not present in context', function () {
+    Context::flush();
+    // No parent_request_id in context
+
+    Auth::shouldReceive('check')->andReturn(false);
+    Auth::shouldReceive('id')->andReturn(null);
+
+    LaravelLogger::shouldReceive('api')
+        ->once()
+        ->with(\Mockery::on(function ($obj) {
+            expect($obj)->toBeInstanceOf(ApiLogObject::class);
+            $arr = $obj->toArray();
+            // parent_request_id should not be present (or be null)
+            expect($arr['parent_request_id'] ?? null)->toBeNull();
+            return true;
+        }), true);
+
+    $req = Request::create('/api/ping', 'GET');
+    (new ApiAccessLog())->handle($req, fn () => new Response('ok', 200));
 });
 

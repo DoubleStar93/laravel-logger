@@ -125,7 +125,7 @@ class LogOrmOperation
         $modelClass = get_class($model);
         $modelId = $model->getKey() ? (string) $model->getKey() : null;
         $table = $model->getTable();
-        $connection = $model->getConnectionName();
+        $connection = $model->getConnectionName() ?: \Illuminate\Support\Facades\DB::getDefaultConnection();
 
         // Try to find matching pending query
         $pendingQuery = $this->findAndRemovePendingQuery($connection, $table, $queryType, $modelId);
